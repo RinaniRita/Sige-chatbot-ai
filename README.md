@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# Sige-chatbot-ai
-=======
 # 🎓 SIGE AI Agent: Customer Support & Lead Management System
 
 Welcome to the **SIGE AI Consultant**! This project is a production-ready AI-powered customer support system specifically built for the **Science Institute for Global Education (SIGE)**. It leverages Retrieval-Augmented Generation (RAG) to provide accurate study-abroad advice for Taiwan and integrates seamlessly with Google Sheets for real-time lead tracking.
@@ -113,4 +110,3 @@ This project is optimized for performance and reliability in the education secto
 
 **SIGE - Science Institute for Global Education**  
 *Building Dreams, Connecting Global Talent.*
->>>>>>> 35d7d27 (Initial commit SIGE: Professional bot)

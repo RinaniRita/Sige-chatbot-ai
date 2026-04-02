@@ -12,6 +12,7 @@ import os
 from ..services.llm_client import llm_client
 from ..services.rag_service import RAGService
 from ..config import OLLAMA_BASE_URL, OLLAMA_MODEL
+from ..services.scripted_responses import get_scripted_response
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,17 @@ def process_agent_query(user_input: str, chat_id: int) -> Dict[str, Any]:
     Process a user query using the SIGE RAG system.
     """
     logger.info(f"[SIGE Agent] Processing query: '{user_input[:50]}...'")
+
+    # Check for scripted response first
+    scripted_answer = get_scripted_response(user_input)
+    if scripted_answer:
+        logger.info("[SIGE Agent] Found scripted response. Bypassing RAG/LLM.")
+        return {
+            "response": scripted_answer,
+            "intent": "SCRIPTED",
+            "tool_used": None,
+            "tool_result": None,
+        }
 
     # Load prompts (re-load each time for development flexibility or cache them)
     CUSTOMER_SUPPORT_PROMPT = _load_prompt("customer_support.md")

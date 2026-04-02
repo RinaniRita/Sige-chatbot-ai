@@ -27,7 +27,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Conversation states
-NAME, PHONE, BIRTH_YEAR, GPA, LANGUAGE, DEGREE, ASPIRATION = range(7)
+NAME, PHONE, EMAIL, BIRTH_YEAR, GPA, LANGUAGE, ASPIRATION, CONFIRM = range(8)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Send a welcome message when the command /start is issued."""
@@ -48,6 +48,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton("🏫 Danh sách các trường", callback_data="ask_truong"),
+            InlineKeyboardButton("📋 Điều kiện tuyển sinh", callback_data="ask_dieukien")
+        ],
+        [
+            InlineKeyboardButton("📂 Hồ sơ cần chuẩn bị", callback_data="ask_hoso"),
+            InlineKeyboardButton("🚀 Quy trình đăng ký", callback_data="ask_quytrinh")
         ],
         [
             InlineKeyboardButton("📝 Đăng ký tư vấn trực tiếp", callback_data="start_lead_form")
@@ -74,11 +79,17 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
     if query.data == "ask_hocbong14":
-        await fake_typing_and_rag(context, chat_id, "Tìm hiểu chương trình hệ chuyên ban quốc tế học bổng 1+4")
+        await fake_typing_and_rag(context, chat_id, "hoc_bong_14")
     elif query.data == "ask_duhoc":
-        await fake_typing_and_rag(context, chat_id, "Các chương trình du học Đài Loan hiện có tại SIGE")
+        await fake_typing_and_rag(context, chat_id, "du_hoc_dai_loan")
     elif query.data == "ask_truong":
-        await fake_typing_and_rag(context, chat_id, "Danh sách các trường cấp đại học mà SIGE đang liên kết")
+        await fake_typing_and_rag(context, chat_id, "danh_sach_truong")
+    elif query.data == "ask_dieukien":
+        await fake_typing_and_rag(context, chat_id, "dieu_kien_tuyen_sinh")
+    elif query.data == "ask_hoso":
+        await fake_typing_and_rag(context, chat_id, "ho_so_chuan_bi")
+    elif query.data == "ask_quytrinh":
+        await fake_typing_and_rag(context, chat_id, "quy_trinh_dang_ky")
     elif query.data == "show_contact":
         await context.bot.send_message(
             chat_id=chat_id,
@@ -89,7 +100,12 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def fake_typing_and_rag(context, chat_id, text):
     """Helper to process RAG internally via button clicks."""
-    await context.bot.send_message(chat_id=chat_id, text=f"_{text}_", parse_mode="Markdown")
+    # Only send the "searching" message if it's NOT a scripted key
+    is_scripted = any(key in text for key in ["hoc_bong_14", "du_hoc_dai_loan", "danh_sach_truong", "dieu_kien_tuyen_sinh", "ho_so_chuan_bi", "quy_trinh_dang_ky"])
+    
+    if not is_scripted:
+        await context.bot.send_message(chat_id=chat_id, text=f"_{text}_", parse_mode="Markdown")
+        
     await context.bot.send_chat_action(chat_id=chat_id, action="typing")
     try:
         result = await asyncio.to_thread(process_agent_query, text, chat_id)
@@ -118,12 +134,27 @@ async def begin_lead_form(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def ask_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['lead']['fb_name'] = update.message.text
+    if context.user_data.get('is_editing'):
+        context.user_data['is_editing'] = False
+        return await show_summary(update, context)
     
     await update.message.reply_text("Cảm ơn! Số điện thoại/Zalo của bạn là gì để chuyên viên liên hệ?")
     return PHONE
 
-async def ask_birth_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def ask_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['lead']['phone'] = update.message.text
+    if context.user_data.get('is_editing'):
+        context.user_data['is_editing'] = False
+        return await show_summary(update, context)
+    
+    await update.message.reply_text("Địa chỉ Email của bạn là gì?")
+    return EMAIL
+
+async def ask_birth_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['lead']['email'] = update.message.text
+    if context.user_data.get('is_editing'):
+        context.user_data['is_editing'] = False
+        return await show_summary(update, context)
     
     await update.message.reply_text("Bạn sinh năm bao nhiêu? (Ví dụ: 2005)")
     return BIRTH_YEAR
@@ -131,42 +162,103 @@ async def ask_birth_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ask_gpa(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['lead']['birth_year'] = update.message.text
     
-    await update.message.reply_text("Điểm trung bình (GPA) gần nhất của bạn là bao nhiêu? (Nếu chưa có điểm tổng kết, có thể ước chừng định dạng 8.5 hoặc 85)")
+    await update.message.reply_text("Điểm trung bình (GPA) gần nhất của bạn là bao nhiêu? (Ví dụ: 8.5 hoặc 85)")
     return GPA
 
-async def ask_language(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['lead']['gpa'] = update.message.text
+async def handle_gpa(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_text = update.message.text
     
-    keyboard = [
-        ["Chưa có", "Tiếng Anh"],
-        ["Tiếng Trung"]
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
-    
-    await update.message.reply_text(
-        "Bạn đã có chứng chỉ ngoại ngữ nào chưa?", 
-        reply_markup=reply_markup
-    )
-    return LANGUAGE
+    try:
+        # Standardize value (handle 8.5 vs 85)
+        raw_text = user_text.replace(",", ".")
+        raw_val = float(raw_text)
+        gpa_val = raw_val if raw_val <= 10 else raw_val / 10
+        
+        if gpa_val < 6.5:
+            await update.message.reply_text(
+                "⚠️ **Thông báo**: Hiện tại các chương trình du học ưu đãi của SIGE yêu cầu mức GPA tối thiểu là **6.5**.\n\n"
+                "Hồ sơ của bạn hiện chưa đủ điều kiện tối thiểu để tiến hành đăng ký. "
+                "Vui lòng nhập lại điểm GPA (ví dụ: 7.5) hoặc liên hệ hotline để được tư vấn thêm về các chương trình dự bị khác."
+            )
+            return GPA
+        
+        context.user_data['lead']['gpa'] = gpa_val
+        
+        if context.user_data.get('is_editing'):
+            context.user_data['is_editing'] = False
+            return await show_summary(update, context)
+        
+        keyboard = [
+            [
+                InlineKeyboardButton("Chưa có", callback_data="lang_none"),
+                InlineKeyboardButton("Tiếng Anh", callback_data="lang_en")
+            ],
+            [
+                InlineKeyboardButton("Tiếng Trung", callback_data="lang_cn")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        await update.message.reply_text(
+            "Bạn đã có chứng chỉ ngoại ngữ nào chưa?", 
+            reply_markup=reply_markup
+        )
+        return LANGUAGE
+        
+    except ValueError:
+        await update.message.reply_text("Vui lòng nhập điểm GPA hợp lệ (ví dụ: 7.5 hoặc 8.0).")
+        return GPA
 
-async def ask_degree(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['lead']['language'] = update.message.text
+async def handle_language_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle language selection when clicking the inline buttons."""
+    query = update.callback_query
+    await query.answer()
     
-    keyboard = [
-        ["TN Cấp 3", "Khối kỹ thuật"],
-        ["Khối kinh tế xã hội"]
-    ]
-    reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
+    lang_map = {
+        "lang_none": "Chưa có",
+        "lang_en": "Tiếng Anh",
+        "lang_cn": "Tiếng Trung"
+    }
     
-    await update.message.reply_text(
-        "Bằng cấp cao nhất của bạn hiện tại thuộc nhóm nào?",
-        reply_markup=reply_markup
+    context.user_data['lead']['language'] = lang_map.get(query.data, "Chưa có")
+    
+    if context.user_data.get('is_editing'):
+        context.user_data['is_editing'] = False
+        return await show_summary(update, context)
+        
+    from telegram import ReplyKeyboardRemove
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Cuối cùng, mong muốn và nguyện vọng DU HỌC của bạn là gì? (Ví dụ: Muốn học hệ vừa học vừa làm, muốn tìm học bổng 100%, ...)",
+        reply_markup=ReplyKeyboardRemove()
     )
-    return DEGREE
+    return ASPIRATION
 
 async def ask_aspiration(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['lead']['degree'] = update.message.text
+    """User typed input instead of clicking inline button for language."""
+    user_text = update.message.text
+    valid_options = ["Chưa có", "Tiếng Anh", "Tiếng Trung"]
     
+    if user_text not in valid_options:
+        keyboard = [
+            [
+                InlineKeyboardButton("Chưa có", callback_data="lang_none"),
+                InlineKeyboardButton("Tiếng Anh", callback_data="lang_en")
+            ],
+            [InlineKeyboardButton("Tiếng Trung", callback_data="lang_cn")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text(
+            "⚠️ Vui lòng CHỌN một trong ba lựa chọn bên dưới để tiếp tục:", 
+            reply_markup=reply_markup
+        )
+        return LANGUAGE
+
+    context.user_data['lead']['language'] = user_text
+    if context.user_data.get('is_editing'):
+        context.user_data['is_editing'] = False
+        return await show_summary(update, context)
+
     from telegram import ReplyKeyboardRemove
     
     await update.message.reply_text(
@@ -175,45 +267,155 @@ async def ask_aspiration(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     return ASPIRATION
 
-async def finish_lead_form(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def review_lead_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Save aspiration then show summary."""
     context.user_data['lead']['aspiration'] = update.message.text
-    
-    lead = context.user_data['lead']
-    lead_id = f"SGV{str(uuid.uuid4().hex)[:5].upper()}"
-    
-    import datetime
-    created_date = datetime.datetime.now().strftime("%d/%m/%Y")
-    
-    db_payload = {
-        "id": lead_id,
-        "created_date": created_date,
-        "fb_name": lead.get('fb_name', ''),
-        "phone": lead.get('phone', ''),
-        "email": "", # Omitted to keep flow concise, but schema supports it
-        "birth_year": lead.get('birth_year', ''),
-        "gpa": lead.get('gpa', ''),
-        "language": lead.get('language', ''),
-        "degree": lead.get('degree', ''),
-        "aspiration": lead.get('aspiration', ''),
-        "lead_source": "Telegram Bot"
-    }
-    
-    # Save to SQLite
-    upsert_customer_lead(db_payload)
-    
-    # Try to push to Google Sheet immediately
-    try:
-        sync_lead_to_sheet(db_payload)
-    except Exception as e:
-        logger.error(f"Failed to sync to sheets: {e}")
+    if context.user_data.get('is_editing'):
+        context.user_data['is_editing'] = False
         
-    await update.message.reply_text(
-        f"✅ **Ghi nhận thông tin thành công!** (Mã sinh viên: `{lead_id}`)\n\n"
-        "Chuyên viên của SIGE sẽ sớm liên hệ tư vấn chuyên sâu qua SĐT bạn cung cấp. "
-        "Trong lúc chờ đợi, bạn vẫn có thể tiếp tục trò chuyện và hỏi tôi về kỳ tuyển sinh Đài Loan nhé!",
-        parse_mode="Markdown"
+    return await show_summary(update, context)
+
+async def show_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Show collected data summary and the edit inline keyboard."""
+    lead = context.user_data['lead']
+    
+    summary = (
+        "🔍 **Xác nhận thông tin của bạn:**\n\n"
+        f"👤 **Họ tên**: {lead.get('fb_name')}\n"
+        f"📞 **SĐT/Zalo**: {lead.get('phone')}\n"
+        f"📧 **Email**: {lead.get('email')}\n"
+        f"📅 **Năm sinh**: {lead.get('birth_year')}\n"
+        f"📊 **Điểm GPA**: {lead.get('gpa')}\n"
+        f"🉐 **Chứng chỉ ngoại ngữ**: {lead.get('language')}\n"
+        f"🎯 **Nguyện vọng**: {lead.get('aspiration')}\n\n"
+        "Bạn có thể nhấn các nút bên dưới để chỉnh sửa hoặc xác nhận đơn đăng ký:"
     )
-    return ConversationHandler.END
+    
+    keyboard = [
+        [InlineKeyboardButton("✅ Xác nhận & Gửi", callback_data="confirm_lead")],
+        [
+            InlineKeyboardButton("✏️ Sửa Tên", callback_data="edit_name"),
+            InlineKeyboardButton("✏️ Sửa SĐT", callback_data="edit_phone")
+        ],
+        [
+            InlineKeyboardButton("✏️ Sửa Email", callback_data="edit_email"),
+            InlineKeyboardButton("✏️ Sửa Năm sinh", callback_data="edit_birth")
+        ],
+        [
+            InlineKeyboardButton("✏️ Sửa GPA", callback_data="edit_gpa"),
+            InlineKeyboardButton("✏️ Sửa Ngoại ngữ", callback_data="edit_lang")
+        ],
+        [InlineKeyboardButton("✏️ Sửa Nguyện vọng", callback_data="edit_asp")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    if update.callback_query:
+        await update.callback_query.message.reply_text(summary, reply_markup=reply_markup, parse_mode="Markdown")
+    else:
+        await update.message.reply_text(summary, reply_markup=reply_markup, parse_mode="Markdown")
+        
+    return CONFIRM
+
+async def process_confirmation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle the final confirmation or edit buttons."""
+    query = update.callback_query
+    await query.answer()
+    
+    if query.data.startswith("edit_"):
+        context.user_data['is_editing'] = True
+        if query.data == "edit_name":
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="📝 Vui lòng nhập lại **Họ và Tên** của bạn:", parse_mode="Markdown")
+            return NAME
+        elif query.data == "edit_phone":
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="📝 Vui lòng nhập lại **Số điện thoại/Zalo**:", parse_mode="Markdown")
+            return PHONE
+        elif query.data == "edit_email":
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="📝 Vui lòng nhập lại **Email**:", parse_mode="Markdown")
+            return EMAIL
+        elif query.data == "edit_birth":
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="📝 Vui lòng nhập lại **Năm sinh**:", parse_mode="Markdown")
+            return BIRTH_YEAR
+        elif query.data == "edit_gpa":
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="📝 Vui lòng nhập lại **Điểm GPA**:", parse_mode="Markdown")
+            return GPA
+        elif query.data == "edit_lang":
+            keyboard = [
+                [
+                    InlineKeyboardButton("Chưa có", callback_data="lang_none"),
+                    InlineKeyboardButton("Tiếng Anh", callback_data="lang_en")
+                ],
+                [InlineKeyboardButton("Tiếng Trung", callback_data="lang_cn")]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="📝 Vui lòng chọn lại **Chứng chỉ ngoại ngữ**:", reply_markup=reply_markup, parse_mode="Markdown")
+            return LANGUAGE
+        elif query.data == "edit_asp":
+            await context.bot.send_message(chat_id=update.effective_chat.id, text="📝 Vui lòng nhập lại **Nguyện vọng du học**:", parse_mode="Markdown")
+            return ASPIRATION
+
+    if query.data == "confirm_lead":
+        # ... logic unchanged below ...
+        lead = context.user_data['lead']
+        lead_id = f"SGV{str(uuid.uuid4().hex)[:5].upper()}"
+        
+        import datetime
+        # Date only for signup (Column B)
+        created_at = datetime.datetime.now().strftime("%d/%m/%Y")
+        
+        db_payload = {
+            "id": lead_id,                  # A
+            "created_date": created_at,     # B
+            "fb_name": lead.get('fb_name', ''), # C
+            "phone": lead.get('phone', ''), # D
+            "email": lead.get('email', ''), # E
+            "birth_year": lead.get('birth_year', ''), # F
+            "gpa": str(lead.get('gpa', '')), 
+            "language": lead.get('language', ''),
+            "aspiration": lead.get('aspiration', ''), # Q
+            "lead_source": "Telegram Bot",
+            "degree": "Removed"
+        }
+        
+        # Save to SQLite
+        upsert_customer_lead(db_payload)
+        
+        # Structure payload explicitly for Google Sheets (A, B, C, D, E, F ... Q)
+        sheets_payload = {
+            "id": lead_id,
+            "signup_time": created_at,
+            "name": lead.get('fb_name', ''),
+            "phone": lead.get('phone', ''),
+            "email": lead.get('email', ''),
+            "birth_year": lead.get('birth_year', ''),
+            "gpa": str(lead.get('gpa', '')),
+            "language": lead.get('language', ''),
+            "aspiration": lead.get('aspiration', '')
+        }
+        
+        # Try to push to Google Sheet immediately
+        try:
+            sync_lead_to_sheet(sheets_payload)
+        except Exception as e:
+            logger.error(f"Failed to sync to sheets: {e}")
+            
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=f"✅ **Ghi nhận thông tin thành công!** (Mã sinh viên: `{lead_id}`)\n\n"
+                 "Chuyên viên của SIGE sẽ sớm liên hệ tư vấn chuyên sâu qua thông tin bạn cung cấp. "
+                 "Trong lúc chờ đợi, bạn vẫn có thể tiếp tục trò chuyện và hỏi tôi về kỳ tuyển sinh Đài Loan nhé!",
+            parse_mode="Markdown"
+        )
+        return ConversationHandler.END
+    
+    elif query.data == "start_lead_form":
+        # Effectively restart by calling the same logic as entry point
+        # But we don't want to nested-call begin_lead_form necessarily, 
+        # let's just use the entry point logic.
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text="Đã hủy. Bạn có thể bắt đầu lại bằng cách nhấn nút Đăng ký tư vấn."
+        )
+        return ConversationHandler.END
 
 async def cancel_form(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from telegram import ReplyKeyboardRemove
@@ -274,12 +476,16 @@ def main():
         ],
         states={
             NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_phone)],
-            PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_birth_year)],
+            PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_email)],
+            EMAIL: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_birth_year)],
             BIRTH_YEAR: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_gpa)],
-            GPA: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_language)],
-            LANGUAGE: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_degree)],
-            DEGREE: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_aspiration)],
-            ASPIRATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, finish_lead_form)],
+            GPA: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_gpa)],
+            LANGUAGE: [
+                CallbackQueryHandler(handle_language_selection, pattern='^lang_.*$'),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, ask_aspiration)
+            ],
+            ASPIRATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, review_lead_data)],
+            CONFIRM: [CallbackQueryHandler(process_confirmation, pattern='^confirm_lead$|^start_lead_form$|^edit_.*$')],
         },
         fallbacks=[CommandHandler('cancel', cancel_form)]
     )

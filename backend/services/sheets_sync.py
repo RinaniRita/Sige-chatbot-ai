@@ -10,13 +10,14 @@ logger = logging.getLogger(__name__)
 
 # The Web App URL you get after deploying the Google Apps Script
 SHEETS_WEBHOOK_URL = os.getenv("GOOGLE_SHEETS_WEBHOOK_URL")
+SIGE_LEADS_SHEET_ID = os.getenv("SIGE_LEADS_SHEET_ID")
 
 def sync_lead_to_sheet(lead_data):
     """
     Sends customer lead data to the Google Sheets Webhook.
     """
-    if not SHEETS_WEBHOOK_URL or not SIGE_LEADS_SHEET_ID:
-        logger.warning("SIGE Leads sync skipped: Webhook URL or Sheet ID not set.")
+    if not SHEETS_WEBHOOK_URL or not SIGE_LEADS_SHEET_ID or "YOUR_APPS_SCRIPT" in SHEETS_WEBHOOK_URL:
+        logger.warning("SIGE Leads sync skipped: Webhook URL or Sheet ID not set correctly.")
         return
 
     try:
