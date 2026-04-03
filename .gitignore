@@ -151,6 +151,14 @@ cython_debug/
 # VS Code
 .vscode/
 
+# AI Agent Configs
+.agent/
+.agents/
+.claude/
+.codex/
+.opencode/
+.codebuddy/
+
 # Project Specific Data
 data/*.db
 data/*.db-journal
