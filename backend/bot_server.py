@@ -1,4 +1,5 @@
 import logging
+import re
 import asyncio
 import uuid
 import os
@@ -18,6 +19,7 @@ from backend.agent.agent_router import process_agent_query
 from backend.config import TELEGRAM_BOT_TOKEN
 from backend.database.db_service import upsert_customer_lead
 from backend.services.sheets_sync import sync_lead_to_sheet
+from backend.services.scripted_responses import SCRIPTED_ANSWERS
 
 # Initialize logging
 logging.basicConfig(
@@ -34,11 +36,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
     welcome_message = (
-        "🎓 **Chào mừng đến với SIGE AI Consultant!**\n\n"
-        "Tôi là trợ lý ảo chuyên hỗ trợ thông tin của Viện Khoa học Giáo dục Toàn Cầu (SIGE). "
-        "Tôi có thể tư vấn các chương trình du học Đài Loan, học bổng đại học/thạc sĩ, "
-        "và các trường đại học hàng đầu Châu Á.\n\n"
-        "Bạn quan tâm đến vấn đề gì? Hãy chọn các gợi ý bên dưới hoặc nhắn trực tiếp câu hỏi cho tôi nhé! 👇"
+        "🚀 **Hệ sinh thái Du học SIGE - Kỳ chuyên ban 3/2026**\n\n"
+        "Chào mừng bạn đến với SIGE AI Consultant! Chúng tôi đã cập nhật toàn bộ thông tin mới nhất về các suất học bổng, chỉ tiêu và chi phí cho **kỳ bay tháng 3/2026**.\n\n"
+        "Bạn quan tâm đến lộ trình nào? Hãy chọn một mục bên dưới để khám phá ngay! 👇"
     )
     
     keyboard = [
@@ -47,19 +47,23 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("🇹🇼 Du học Đài Loan", callback_data="ask_duhoc")
         ],
         [
-            InlineKeyboardButton("🏫 Danh sách các trường", callback_data="ask_truong"),
+            InlineKeyboardButton("🏫 Danh sách trường", callback_data="ask_truong"),
             InlineKeyboardButton("📋 Điều kiện tuyển sinh", callback_data="ask_dieukien")
         ],
         [
-            InlineKeyboardButton("📂 Hồ sơ cần chuẩn bị", callback_data="ask_hoso"),
-            InlineKeyboardButton("🚀 Quy trình đăng ký", callback_data="ask_quytrinh")
+            InlineKeyboardButton("💰 Các gói dịch vụ", callback_data="ask_hocbong"),
+            InlineKeyboardButton("💼 Việc làm & Thực tập", callback_data="ask_vieclam")
         ],
         [
-            InlineKeyboardButton("📝 Đăng ký tư vấn trực tiếp", callback_data="start_lead_form")
+            InlineKeyboardButton("📂 Hồ sơ chuẩn bị", callback_data="ask_hoso"),
+            InlineKeyboardButton("🚀 Quy trình 7 bước", callback_data="ask_quytrinh")
         ],
         [
-            InlineKeyboardButton("🌐 Website SIGE", url="https://sige.edu.vn"),
-            InlineKeyboardButton("📱 Hotline: 0933481111", callback_data="show_contact")
+            InlineKeyboardButton("📝 Đăng ký tư vấn trực tuyến (Hot)", callback_data="start_lead_form")
+        ],
+        [
+            InlineKeyboardButton("🌐 Website", url="https://sige.edu.vn"),
+            InlineKeyboardButton("📞 Hotline: 0938491111", callback_data="show_contact")
         ]
     ]
     
@@ -88,23 +92,34 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await fake_typing_and_rag(context, chat_id, "dieu_kien_tuyen_sinh")
     elif query.data == "ask_hoso":
         await fake_typing_and_rag(context, chat_id, "ho_so_chuan_bi")
+    elif query.data == "ask_hocbong":
+        await fake_typing_and_rag(context, chat_id, "hoc_bong_chung")
+    elif query.data == "ask_vieclam":
+        await fake_typing_and_rag(context, chat_id, "co_hoi_viec_lam")
     elif query.data == "ask_quytrinh":
         await fake_typing_and_rag(context, chat_id, "quy_trinh_dang_ky")
     elif query.data == "show_contact":
         await context.bot.send_message(
             chat_id=chat_id,
-            text="📞 **Hotline SIGE**: 0933481111\n📧 **Email**: lienhe@sige.edu.vn\n📍 **Địa chỉ**: Viện Khoa học và Giáo dục Toàn Cầu\n\nBạn có thể nhấn nút **Đăng ký tư vấn trực tiếp** để chuyên viên liên hệ trong vài phút!",
+            text=(
+                "📞 **Hotline SIGE**: 0938491111\n"
+                "📧 **Email**: sige@gmail.com\n"
+                "📍 **Địa chỉ**: Tầng 4, Tòa VINATA 2B, Số 289 Khuất Duy Tiến, Phường Đại Mỗ, TP. Hà Nội\n\n"
+                "Bạn có thể nhấn nút **Đăng ký tư vấn trực tiếp** để chuyên viên liên hệ trong vài phút!"
+            ),
             parse_mode="Markdown"
         )
     return ConversationHandler.END
 
 async def fake_typing_and_rag(context, chat_id, text):
     """Helper to process RAG internally via button clicks."""
-    # Only send the "searching" message if it's NOT a scripted key
-    is_scripted = any(key in text for key in ["hoc_bong_14", "du_hoc_dai_loan", "danh_sach_truong", "dieu_kien_tuyen_sinh", "ho_so_chuan_bi", "quy_trinh_dang_ky"])
+    # Check if the text is a direct key in scripted responses
+    is_scripted = text in SCRIPTED_ANSWERS
     
     if not is_scripted:
-        await context.bot.send_message(chat_id=chat_id, text=f"_{text}_", parse_mode="Markdown")
+        # Escape or avoid underscores if echoing user queries to avoid Markdown errors
+        display_text = text.replace("_", "\\_")
+        await context.bot.send_message(chat_id=chat_id, text=f"_{display_text}_", parse_mode="Markdown")
         
     await context.bot.send_chat_action(chat_id=chat_id, action="typing")
     try:
@@ -151,7 +166,24 @@ async def ask_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return EMAIL
 
 async def ask_birth_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['lead']['email'] = update.message.text
+    email = update.message.text.strip()
+    # Regex: Must contain exactly one "@", text before/after, and a domain with a dot. No spaces.
+    email_regex = r"^[^\s@]+@[^\s@]+\.[^\s@]+$"
+    
+    if not re.match(email_regex, email):
+        await update.message.reply_text(
+            "❌ **Email không hợp lệ!**\n\n"
+            "Vui lòng đảm bảo email:\n"
+            "- Có duy nhất một ký tự '@'\n"
+            "- Có phần tên trước và tên miền sau '@'\n"
+            "- Tên miền có dấu chấm (vd: .com, .vn)\n"
+            "- Không chứa khoảng trắng\n\n"
+            "Mời bạn nhập lại địa chỉ Email:",
+            parse_mode="Markdown"
+        )
+        return EMAIL
+
+    context.user_data['lead']['email'] = email
     if context.user_data.get('is_editing'):
         context.user_data['is_editing'] = False
         return await show_summary(update, context)
@@ -160,9 +192,39 @@ async def ask_birth_year(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return BIRTH_YEAR
 
 async def ask_gpa(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['lead']['birth_year'] = update.message.text
+    year_text = update.message.text.strip()
     
-    await update.message.reply_text("Điểm trung bình (GPA) gần nhất của bạn là bao nhiêu? (Ví dụ: 8.5 hoặc 85)")
+    # Policy Validation for Birth Year (Current Year is 2026)
+    try:
+        birth_year = int(year_text)
+        age = 2026 - birth_year
+        
+        if age < 18:
+            await update.message.reply_text(
+                "⚠️ **Thông báo**: Để tham gia các chương trình du học Đài Loan, bạn cần đủ **18 tuổi** (đã tốt nghiệp THPT).\n"
+                "Vui lòng kiểm tra lại năm sinh của bạn:"
+            )
+            return BIRTH_YEAR
+        elif age > 40:
+            await update.message.reply_text(
+                "⚠️ **Thông báo**: Hiện tại SIGE hỗ trợ tốt nhất cho các ứng viên du học **dưới 40 tuổi**.\n"
+                "Nếu bạn vẫn muốn tư vấn hệ chuyên gia, vui lòng kiểm tra lại hoặc nhập năm sinh chính xác:"
+            )
+            return BIRTH_YEAR
+            
+        context.user_data['lead']['birth_year'] = birth_year
+    except ValueError:
+        await update.message.reply_text("Vui lòng nhập năm sinh hợp lệ bằng số (Ví dụ: 2005):")
+        return BIRTH_YEAR
+
+    if context.user_data.get('is_editing'):
+        context.user_data['is_editing'] = False
+        return await show_summary(update, context)
+    
+    await update.message.reply_text(
+        "Điểm trung bình (GPA) gần nhất của bạn là bao nhiêu? (Ví dụ: 8.5 hoặc 85)\n\n"
+        "💡 *Lưu ý*: GPA từ **6.0** trở lên là điều kiện tối thiểu, nhưng từ **7.0** trở lên sẽ có cơ hội nhận học bổng cao nhất."
+    )
     return GPA
 
 async def handle_gpa(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -174,11 +236,11 @@ async def handle_gpa(update: Update, context: ContextTypes.DEFAULT_TYPE):
         raw_val = float(raw_text)
         gpa_val = raw_val if raw_val <= 10 else raw_val / 10
         
-        if gpa_val < 6.5:
+        if gpa_val < 6.0:
             await update.message.reply_text(
-                "⚠️ **Thông báo**: Hiện tại các chương trình du học ưu đãi của SIGE yêu cầu mức GPA tối thiểu là **6.5**.\n\n"
-                "Hồ sơ của bạn hiện chưa đủ điều kiện tối thiểu để tiến hành đăng ký. "
-                "Vui lòng nhập lại điểm GPA (ví dụ: 7.5) hoặc liên hệ hotline để được tư vấn thêm về các chương trình dự bị khác."
+                "⚠️ **Thông báo chính sách**: Hiện tại các chương trình của SIGE yêu cầu mức GPA tối thiểu là **6.0**.\n\n"
+                "Hồ sơ của bạn hiện chưa đủ điều kiện tối thiểu để đăng ký trực tuyến. "
+                "Vui lòng nhập lại điểm GPA chính xác (GPA mỗi học kỳ >= 6.0) hoặc liên hệ hotline để được tư vấn lộ trình dự bị:"
             )
             return GPA
         

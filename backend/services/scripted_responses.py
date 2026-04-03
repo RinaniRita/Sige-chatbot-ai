@@ -3,103 +3,106 @@ from typing import Optional
 
 # Dictionary mapping identifying keys to scripted markdown responses
 SCRIPTED_ANSWERS = {
-    "danh_sach_truong": """🏫 **Danh sách các trường đại học liên kết với SIGE:**
+    "danh_sach_truong": """🏫 **Danh sách các trường đại học liên kết tiêu biểu với SIGE (Kỳ 3/2026):**
 
-Viện SIGE hiện liên kết với **12 ngôi trường cao cấp** tại Đài Loan, trong đó có các trường tiêu biểu:
+Viện SIGE hiện liên kết chiến lược với nhiều ngôi trường đại học cao cấp tại Đài Loan, tiêu biểu gồm:
 
-1. **Đại học Quốc tế Minh Truyền (MCU):** Tiên phong tại Châu Á đạt chuẩn MSCHE (Hoa Kỳ). Ngành mũi nhọn: Truyền thông, Thiết kế, QTKD, CNTT, Bán dẫn.
-2. **Đại học Quốc lập Ky Nam (NCNU):** Top 44 trường đại học xanh nhất thế giới, tọa lạc tại Đầm Nhật Nguyệt.
-3. **Đại học Công nghệ Trung Tín (CTBC):** Trực thuộc ngân hàng CTBC, mạnh về Bán dẫn, AI, Cơ khí (đảm bảo thực tập và đầu ra).
-4. **Đại học KHKT Lĩnh Đông (LTU):** Tọa lạc tại Đài Trung, nổi tiếng với ngành Thiết kế thuộc Top 100 thế giới.
+1. **Đại học Quốc tế Minh Truyền (MCU):** Đạt chuẩn MSCHE (Hoa Kỳ). Mạnh về Truyền thông, QTKD, CNTT.
+2. **Đại học KHKT Lĩnh Đông (LTU):** Top 100 thế giới về Thiết kế. Có hệ VHVL Chăm sóc sắc đẹp cực "hot".
+3. **Đại học Đài Cương (TSU):** Chuyên về Bán dẫn & Kỹ thuật. Có học bổng miễn 100% học phí & KTX + trợ cấp ~8M/tháng.
+4. **Đại học Trung Tín (CTBC):** Trực thuộc ngân hàng lớn nhất Đài Loan. Mạnh về AI và Bán dẫn.
+5. **Đại học John (St. John's):** Tại Đài Bắc, miễn 100% học phí & KTX kỳ đầu cho hệ tự túc.
+6. **Đại học Quốc lập Ky Nam (NCNU):** Trường công lập xanh nhất thế giới, thế mạnh về Du lịch & CNTT.
 
-👉 Bạn muốn tìm hiểu chi tiết về trường nào trong danh sách trên không?""",
+👉 Bạn có muốn tìm hiểu kỹ hơn về lộ trình tuyển sinh của trường nào không?""",
 
     "hoc_bong_14": """🎯 **Chương trình Hệ chuyên ban Quốc tế 1+4 (Dự bị Đại học):**
 
-Đây là lộ trình học tập linh hoạt nhất dành cho sinh viên Việt Nam:
-- **Cấu trúc:** 1 năm học tiếng Trung dự bị + 4 năm học chuyên ngành chính quy.
-- **Ưu điểm vượt trội:** 
-  ✅ KHÔNG yêu cầu chứng chỉ ngoại ngữ khi nộp hồ sơ ban đầu.
-  ✅ Miễn 100% học phí năm đầu tiên (tùy trường).
-  ✅ Được chọn ngành học yêu thích sau khi hoàn thành năm dự bị.
-- **Yêu cầu:** Đạt TOCFL A2 sau 1 năm học tiếng để chuyển tiếp vào chuyên ngành.
+Đây là lộ trình du học ưu tiên của SIGE dành cho kỳ tuyển sinh tháng 3/2026.
+**Điều kiện & Quy định (Kỳ 3/2026):**
+- **Học thuật:** Tốt nghiệp THPT, GPA mỗi học kỳ từ **6.0 trở lên**. 
+- **Chỉ tiêu:** Riêng trường Minh Truyền (MCU) dự kiến chỉ có 50-60 suất (ưu tiên đối tác chiến lược).
+- **Ngoại ngữ:** Không cần bằng lúc nộp hồ sơ, nhưng phải đạt **TOCFL A2** sau 1 năm học tiếng tại Đài Loan.
+- **Học bổng:** Miễn 100% học phí năm đầu (Bộ Giáo dục hỗ trợ). Các năm sau dựa trên GPA > 80.
 
-Đây là lựa chọn lý tưởng nếu bạn chưa có nền tảng tiếng Trung nhưng muốn du học ngay!""",
+👉 Nên nộp hồ sơ sớm vì hệ này chốt chỉ tiêu rất nhanh!""",
 
-    "dieu_kien_tuyen_sinh": """📝 **Điều kiện tuyển sinh du học Đài Loan tại SIGE:**
+    "dieu_kien_tuyen_sinh": """📝 **Yêu cầu & Điều kiện tuyển sinh chi tiết (Cập nhật 2026):**
 
-Để tham gia các chương trình, bạn cần đáp ứng các tiêu chuẩn cơ bản sau:
-1. **Học thuật:** Tốt nghiệp THPT với GPA mỗi học kỳ từ **7.0 trở lên** (hệ ngôn ngữ có thể từ 6.5).
-2. **Độ tuổi:** 
-   - Hệ Đại học: 18 - 22 tuổi.
-   - Hệ Ngôn ngữ: Dưới 28 tuổi.
-   - Hệ Thạc sĩ: Dưới 40 tuổi.
-3. **Sức khỏe:** Có giấy khám sức khỏe theo mẫu Đài Loan, không mắc bệnh truyền nhiễm.
-4. **Tài chính:** Sổ tiết kiệm từ **120 - 200 triệu VNĐ** (tùy hệ).
-5. **Pháp lý:** Không có tiền án tiền sự.
+Viện SIGE áp dụng các tiêu chuẩn mới cho kỳ tuyển sinh 3/2026:
 
-Bạn có thắc mắc cụ thể về điều kiện nào không?""",
+1. **Hệ 1+4 & VHVL:** 
+   - GPA trung bình mỗi năm từ **6.0** trở lên.
+   - Độ tuổi: 18 - 22 (đẹp nhất là 18-20).
+   - Ngoại ngữ: Ưu tiên TOCFL A1/A2 để tăng tỷ lệ đỗ Visa.
 
-    "ho_so_chuan_bi": """📂 **Hồ sơ du học Đài Loan cần chuẩn bị:**
+2. **Hệ Thạc sĩ:**
+   - Tốt nghiệp ĐH/CĐ (có kinh nghiệm). 
+   - TOCFL A2/B1. Tuổi dưới 40.
 
-Bạn nên chuẩn bị sẵn các giấy tờ sau để quá trình làm thủ tục diễn ra nhanh chóng:
-1. **Học tập:** Học bạ và Bằng tốt nghiệp THPT/Đại học (bản gốc).
-2. **Định danh:** CCCD (photo), Hộ chiếu (gốc, còn hạn), Giấy khai sinh.
-3. **Ảnh thẻ:** 05 ảnh theo quy chuẩn Văn phòng Đài Bắc (nền trắng, áo có cổ).
-4. **Ngoại ngữ:** Chứng chỉ IELTS hoặc TOCFL (nếu có).
-5. **Tài chính:** Sổ tiết kiệm (120 - 200 triệu VNĐ).
-6. **Y tế:** Giấy khám sức khỏe & Phiếu tiêm chủng.
-7. **Pháp lý:** Phiếu lý lịch tư pháp số 2.
+3. **Hệ Tự túc:**
+   - GPA từ 6.0. TOCFL A2 (hoặc IELTS 5.0+). 
+   - Tự do đi làm, không phụ thuộc doanh nghiệp chỉ định.
 
-Viện SIGE sẽ hỗ trợ bạn hoàn thiện và công chứng các giấy tờ này!""",
+**Điều kiện chung:**
+- **Tài chính:** Sổ tiết kiệm từ 150 - 180 triệu VNĐ nộp trước khi xin Visa.
+- **Sức khỏe:** Khám theo mẫu Đài Loan (khu vực miền Trung/Nam khám tại cơ sở chỉ định).
+- **Pháp lý:** Không tiền án tiền sự, lý lịch tư pháp số 2 sạch.""",
 
-    "quy_trinh_dang_ky": """🚀 **Quy trình đăng ký du học tại SIGE (6 bước):**
+    "ho_so_chuan_bi": """📂 **Danh mục hồ sơ cần chuẩn bị (7 Bước):**
 
-1. **Nộp hồ sơ:** Gửi hồ sơ về SIGE hoặc điền form trực tuyến.
-2. **Phỏng vấn:** Tham gia phỏng vấn với đại diện trường/doanh nghiệp.
-3. **Xác nhận:** Hoàn thành thủ tục đặt cọc và phí hành chính.
-4. **Nhận thông báo:** Nhận Giấy báo nhập học (Admission Letter) từ Đài Loan.
-5. **Xin Visa:** SIGE hướng dẫn và hỗ trợ nộp hồ sơ xin visa.
-6. **Nhập học:** Bay sang Đài Loan và bắt đầu hành trình mới!
+1. **Học tập:** Bằng tốt nghiệp & Học bạ gốc (Bắt buộc scan lại 1 bản để lưu).
+2. **Nhân thân:** Hộ chiếu (gốc), CCCD, Giấy khai sinh mẫu mới.
+3. **Pháp lý:** Lý lịch tư pháp số 2.
+4. **Sức khỏe:** Khám theo thông báo của Viện (tại VN và sau đó tại Đài Loan).
+5. **Tài chính:** Sổ tiết kiệm 150 - 180 triệu VNĐ (tên SV hoặc bố mẹ).
+6. **Ảnh:** 05 ảnh thẻ 4x6 chuẩn VP Đài Bắc.
 
-Toàn bộ quy trình thường kéo dài từ 2-4 tháng tùy kỳ nhập học.""",
+Viện SIGE sẽ hỗ trợ trọn gói từ khâu dịch thuật đến nộp Visa!""",
 
-    "hoc_bong_chung": """💰 **Chính sách Học bổng và Hỗ trợ Tài chính tại SIGE:**
+    "quy_trinh_dang_ky": """🚀 **Quy trình hồ sơ tại SIGE (7 Bước):**
 
-SIGE cam kết đồng hành cùng sinh viên săn học bổng giá trị cao:
-- **Học bổng Nhà trường:** Miễn 100% học phí năm đầu, các năm sau xét theo GPA & TOCFL.
-- **Tài trợ Doanh nghiệp (ASE, Liteon):** Tài trợ toàn phần 4 năm học + cam kết việc làm sau tốt nghiệp.
-- **Trợ cấp sinh hoạt:** Một số chương trình hỗ trợ từ 6.600 - 10.000 TWD/tháng.
-- **Yêu cầu duy trì:** Thường cần GPA > 80 và chứng chỉ tiếng Trung nâng cao dần theo từng năm.
+1. **Ký Hợp đồng:** Đặt cọc 10-20M VNĐ tùy gói. Điền form up dữ liệu hệ thống.
+2. **Nộp hồ sơ:** Chuẩn bị 5 mục giấy tờ cơ bản (Hộ chiếu, Bằng cấp, v.v.).
+3. **Phỏng vấn trường:** Viết tự truyện, kế hoạch học tập. Phỏng vấn Online/Trực tiếp.
+4. **Chuẩn bị Visa:** Khám sức khỏe, chứng chỉ tiếng, Sổ tiết kiệm (150-180M).
+5. **Nộp Visa:** SIGE nộp (1+4/VHVL) hoặc SV tự nộp dưới sự hướng dẫn.
+6. **Đặt vé & Bay:** Xuất vé máy bay, tập trung tại sân bay trước 3 tiếng. 
+7. **Hạ cánh:** Trường đón về KTX tại Đài Loan.
 
-Liên hệ SIGE ngay để được thiết kế lộ trình học bổng riêng cho bạn!""",
+👉 Toàn bộ lộ trình được SIGE đồng hành sát sao!""",
 
-    "co_hoi_viec_lam": """💼 **Cơ hội việc làm sau tốt nghiệp:**
+    "hoc_bong_chung": """💰 **Chính sách Học bổng & Các gói Dịch vụ tại SIGE:**
 
-SIGE đảm bảo lộ trình nghề nghiệp vững chắc cho du học sinh:
-- **Thực tập có lương:** Ngay khi đang học, sinh viên được thực tập tại các tập đoàn lớn (ASE, Liteon) với mức lương hỗ trợ hấp dẫn (~28.590 TWD/tháng).
-- **Cam kết đầu ra:** Sinh viên tốt nghiệp hệ tài trợ doanh nghiệp được làm việc tại tập đoàn 2 năm với mức lương kỹ sư chính thức.
-- **Hỗ trợ định cư:** SIGE hỗ trợ thủ tục chuyển đổi visa kỹ sư để làm việc lâu dài tại Đài Loan.
-- **Lương tham khảo:** Lương chính thức khởi điểm từ 31.150 TWD/tháng trở lên.
+Viện SIGE cung cấp các gói dịch vụ minh bạch cho mọi đối tượng:
+- **Gói Cơ bản (36M):** Hồ sơ, dịch thuật, luyện phỏng vấn, Visa lần 1.
+- **Gói VIP (55M):** Gồm Gói Cơ bản + Học tiếng A1/A2, Vé máy bay, Thẻ lưu trú, Bảo hiểm, Tư trang (chăn/ga/gối) tại Đài Loan.
+- **Gói IELTS (70M):** Cam kết đầu ra IELTS 5.0 và trọn bộ dịch vụ VIP.
 
-Bạn muốn tìm hiểu thêm về việc làm tại Đài Loan hay Việt Nam?""",
+**Học bổng tiêu biểu:**
+- **Lĩnh Đông (VHVL Chăm sóc sắc đẹp):** Miễn 100% học phí kỳ 1 nếu đạt A2.
+- **Đài Cương (Văn bằng 2):** Miễn học phí & KTX + hỗ trợ sinh hoạt ~8 triệu VNĐ/tháng.
 
-    "du_hoc_dai_loan": """🇹🇼 **Tổng quan về Du học Đài Loan tại SIGE:**
+Liên hệ hotline **0938491111** để nhận bảng phí chi tiết!""",
 
-Đài Loan là điểm đến giáo dục hàng đầu với chi phí tối ưu và cơ hội sự nghiệp rộng mở. Viện SIGE cung cấp các lộ trình du học trọn gói:
+    "co_hoi_viec_lam": """💼 **Thực tập & Việc làm (Chính sách 2026):**
 
-✨ **Các hệ đào tạo tiêu biểu:**
-- **Hệ 1+4 (Dự bị Đại học):** 1 năm học tiếng + 4 năm chuyên ngành. Không cần chứng chỉ ngoại ngữ ban đầu.
-- **Hệ Vừa học vừa làm:** Thực tập có lương tại doanh nghiệp ngay từ năm 2.
-- **Hệ Thạc sĩ & Tiến sĩ:** Dành cho sinh viên muốn nâng cao trình độ chuyên môn.
-- **Hệ Chuyên ban Bán dẫn:** Đào tạo kỹ sư cho các tập đoàn công nghệ hàng đầu thế giới (ASE, Liteon).
+SIGE cam kết lộ trình thực nghiệp an toàn:
+- **Hệ VHVL:** Thực tập theo chỉ định của trường kỳ 2/4. Lương thực tập ~28.590 TWD/tháng.
+- **Hệ Tự túc:** Sau 2 kỳ học tiếng (6 tháng) được cấp thẻ lao động, làm 20h/tuần tùy chọn công việc.
+- **Cam kết đầu ra:** Với các hệ liên kết, lương kĩ sư chính thức sau tốt nghiệp từ 31.150 TWD/tháng trở lên.
+- **Hỗ trợ định cư:** Chuyển đổi Visa Kỹ sư cho SV sau khi tốt nghiệp.""",
 
-🏥 **Hỗ trợ toàn diện từ SIGE:**
-- Có văn phòng đại diện tại **Đài Bắc, Đào Viên và Cao Hùng** để hỗ trợ sinh viên ngay khi nhập cảnh.
-- Hợp tác với hơn 12 trường đại học danh tiếng và các tập đoàn lớn.
-- Cam kết học bổng và việc làm sau tốt nghiệp.
+    "du_hoc_dai_loan": """🇹🇼 **Tại sao chọn Hệ sinh thái SIGE (Kỳ 3/2026)?**
 
-👉 Bạn đang quan tâm đến hệ đào tạo nào cụ thể không?"""
+Viện Khoa học Giáo dục Toàn Cầu hỗ trợ SV tiếp cận các chương trình độc quyền:
+- **Chương trình 2+2+3:** Học tại Đài Loan -> Sang Mỹ (Đại học Lincoln) với gói tài trợ 70.000 USD.
+- **Joint Degree 3+1:** Lĩnh Đông liên kết Anh/Úc, lấy song bằng quốc tế.
+- **Hệ sinh thái VIP:** Lo cho bạn từ bữa ăn hạ cánh đến tư trang cá nhân tại KTX.
+- **Hành lang Pháp lý:** Hỗ trợ xử lý nhanh Visa thẳng (1+4, VHVL) và cam kết minh bạch tài chính.
+
+📞 Hotline: **0938491111**
+📍 Địa chỉ: Tầng 4, Tòa VINATA 2B, 289 Khuất Duy Tiến, Hà Nội."""
 }
 
 # Mapping of common phrase patterns to keys
@@ -119,7 +122,8 @@ QUERY_MAPPING = {
     r"việc làm|tốt nghiệp xong làm gì": "co_hoi_viec_lam",
     r"thực tập có lương": "co_hoi_viec_lam",
     r"du học đài loan": "du_hoc_dai_loan",
-    r"chương trình du học": "du_hoc_dai_loan"
+    r"chương trình du học": "du_hoc_dai_loan",
+    r"chi phí|giá|bao nhiêu tiền|gói dịch vụ": "hoc_bong_chung"
 }
 
 def get_scripted_response(query: str) -> Optional[str]:
