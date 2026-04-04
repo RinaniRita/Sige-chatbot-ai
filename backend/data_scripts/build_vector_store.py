@@ -54,20 +54,30 @@ except ImportError:
 def get_ollama_embedding(text: str) -> List[float]:
     """
     Get embedding via local Ollama API.
-    Supports both /api/embeddings (Ollama <0.5) and /api/embed (Ollama >=0.5).
+    Handles legacy /api/embeddings and modern /api/embed endpoints.
     """
-    # Try legacy endpoint first (Ollama 0.x)
+    # 1. Try Modern Endpoint (Ollama >= 0.1.33)
+    try:
+        url = f"{OLLAMA_BASE_URL}/api/embed"
+        payload = {"model": OLLAMA_EMBED_MODEL, "input": text}
+        response = requests.post(url, json=payload, timeout=60)
+        if response.status_code == 200:
+            # New format returns "embeddings": [[...]]
+            data = response.json()
+            if "embeddings" in data:
+                return data["embeddings"][0]
+    except Exception:
+        pass
+
+    # 2. Try Legacy Endpoint (Ollama < 0.1.33)
     url = f"{OLLAMA_BASE_URL}/api/embeddings"
-    payload = {
-        "model": OLLAMA_EMBED_MODEL,
-        "prompt": text
-    }
+    payload = {"model": OLLAMA_EMBED_MODEL, "prompt": text}
     try:
         response = requests.post(url, json=payload, timeout=60)
         response.raise_for_status()
         return response.json()["embedding"]
     except Exception as e:
-        logger.error(f"Ollama embedding (/api/embeddings) failed: {e}")
+        logger.error(f"Ollama embedding failed for model '{OLLAMA_EMBED_MODEL}': {e}")
         raise
 
 

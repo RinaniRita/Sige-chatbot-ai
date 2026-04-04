@@ -39,7 +39,6 @@ APP_ENV = os.getenv("APP_ENV", "development")
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 # --------------------------------------------------

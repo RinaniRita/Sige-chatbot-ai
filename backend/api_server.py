@@ -8,7 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from telegram import Bot
+#
 
 # Import Database service
 import sys
@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from backend.database.db_service import (
     init_db, upsert_customer_lead, update_lead_field, get_customer_lead
 )
-from backend.config import TELEGRAM_BOT_TOKEN
+#
 
 logger = logging.getLogger(__name__)
 

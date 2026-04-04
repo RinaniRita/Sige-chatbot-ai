@@ -121,3 +121,13 @@ def get_customer_lead(lead_id):
     finally:
         conn.close()
 
+
+def get_next_lead_index():
+    """Get the next sequential ID based on current record count."""
+    conn = get_connection()
+    try:
+        row = conn.execute("SELECT COUNT(*) FROM customer_leads").fetchone()
+        return (row[0] + 1) if row else 1
+    finally:
+        conn.close()
+

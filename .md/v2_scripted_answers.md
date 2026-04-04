@@ -1,6 +1,3 @@
-# SIGE Bot - Scripted Responses Reference (v2 - March 2026 Intake)
-
-This document contains all the predefined responses used by the SIGE Telegram Bot, optimized for conversion, branding, and recruitment.
 
 ---
 
@@ -9,12 +6,12 @@ This document contains all the predefined responses used by the SIGE Telegram Bo
 
 Viện SIGE hiện liên kết chiến lược với nhiều ngôi trường đại học cao cấp tại Đài Loan, tiêu biểu gồm:
 
-1. **Đại học Quốc tế Minh Truyền (MCU):** Đạt chuẩn MSCHE (Hoa Kỳ). Mạnh về Truyền thông, QTKD, CNTT.
-2. **Đại học KHKT Lĩnh Đông (LTU):** Top 100 thế giới về Thiết kế. Có hệ VHVL Chăm sóc sắc đẹp cực "hot".
-3. **Đại học Đài Cương (TSU):** Chuyên về Bán dẫn & Kỹ thuật. Có học bổng miễn 100% học phí & KTX + trợ cấp ~8M/tháng.
-4. **Đại học Trung Tín (CTBC):** Trực thuộc ngân hàng lớn nhất Đài Loan. Mạnh về AI và Bán dẫn.
-5. **Đại học John (St. John's):** Tại Đài Bắc, miễn 100% học phí & KTX kỳ đầu cho hệ tự túc.
-6. **Đại học Quốc lập Ky Nam (NCNU):** Trường công lập xanh nhất thế giới, thế mạnh về Du lịch & CNTT.
+1. **Đại học Minh Truyền (MCU):** Đạt chuẩn MSCHE (Hoa Kỳ). Hệ 1+4 kỳ 3/2026 chỉ còn ~50 suất ưu tiên. 
+2. **Đại học Lĩnh Đông (LTU):** Top 100 Thiết kế. Đặc biệt: Hệ VHVL Chăm sóc sắc đẹp (20 suất) tặng học bổng 100% học phí kỳ 1 (nếu có TOCFL A2) hoặc 50% (nếu có A1).
+3. **Đại học Đài Cương (TSU):** Bán dẫn & Kỹ thuật. Miễn 100% học phí & KTX toàn khóa + trợ cấp ~8M/tháng.
+4. **Đại học Trung Tín (CTBC):** Trực thuộc ngân hàng lớn nhất ĐL. Miễn 100% học phí & KTX kỳ đầu.
+5. **Đại học John (St. John's):** Tại Đài Bắc. Miễn 100% học phí & KTX kỳ đầu cho hệ tự túc.
+6. **Đại học Quốc lập Ky Nam (NCNU):** Trường công lập xanh nhất thế giới. Miễn học phí 2 năm đầu (Hệ tự túc) hoặc 1 năm đầu (Thạc sĩ).
 
 👉 Bạn muốn nhận thông tin chi tiết về yêu cầu đầu vào của trường nào?
 
@@ -48,12 +45,13 @@ Viện SIGE hiện liên kết chiến lược với nhiều ngôi trường đ�
 Viện SIGE áp dụng các tiêu chuẩn mới cho kỳ tuyển sinh 3/2026:
 
 1. **Hệ 1+4 & VHVL:** 
-   - GPA trung bình mỗi năm từ **6.0** trở lên.
-   - Độ tuổi: 18 - 22 (đẹp nhất là 18-20).
-   - Ngoại ngữ: Ưu tiên TOCFL A1/A2 để tăng tỷ lệ đỗ Visa.
+   - GPA từng kỳ cấp 3 tối thiểu **6.0**. 
+   - Độ tuổi: 18 - 22 (Đẹp nhất là 18-20 cho hệ 1+4).
+   - Ngoại ngữ: Ưu tiên TOCFL A1/A2 để tăng tỷ lệ Visa thẳng.
 
 2. **Hệ Thạc sĩ:**
-   - Tốt nghiệp ĐH/CĐ. TOCFL A2/B1. Tuổi < 40.
+   - Tốt nghiệp ĐH/CĐ. TOCFL A2 (Bản giấy). Tuổi < 40.
+   - Học bổng: Lĩnh Đông (100% chuyên ngành QTDN/MBA/Du lịch), Ky Nam (Miễn học phí năm 1).
 
 3. **Hệ Tự túc:**
    - GPA từ 6.0. TOCFL A2 (hoặc IELTS 5.0+). 
@@ -130,17 +128,14 @@ SIGE cam kết lộ trình thực nghiệp an toàn:
 - **Cam kết đầu ra:** Lương kĩ sư chính thức từ 31.150 TWD/tháng trở lên.
 - **Hỗ trợ định cư:** Chuyển đổi Visa Kỹ sư sau tốt nghiệp.
 
-**Nút bấm (CTAs):**
-- [💼 Tìm việc làm lương cao]
-
 ---
 
 ## 🇹🇼 Tại sao chọn SIGE (du_hoc_dai_loan)
 🇹🇼 **Tại sao chọn Hệ sinh thái SIGE (Kỳ 3/2026)?**
 
 Viện Khoa học Giáo dục Toàn Cầu hỗ trợ SV tiếp cận các chương trình độc quyền:
-- **Chương trình 2+2+3:** Tài trợ lên tới 70.000 USD.
 - **Joint Degree 3+1:** Lấy song bằng Anh/Úc & Đài Loan.
+- **Chương trình 2+2+3 (Mỹ):** Đã hết chỉ tiêu kỳ 3/2026. Vui lòng liên hệ để đặt chỗ kỳ 9/2026.
 - **Hệ sinh thái VIP:** Bảo trợ trọn gói từ lúc bay đến khi ổn định tại KTX.
 
 ✨ **Vibe từ Viện trưởng:**

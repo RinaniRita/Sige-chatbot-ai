@@ -1,22 +1,25 @@
 # 🎓 SIGE AI Agent: Customer Support & Lead Management System
 
-Welcome to the **SIGE AI Consultant**! This project is a production-ready AI-powered customer support system specifically built for the **Science Institute for Global Education (SIGE)**. It leverages Retrieval-Augmented Generation (RAG) to provide accurate study-abroad advice for Taiwan and integrates seamlessly with Google Sheets for real-time lead tracking.
+Welcome to the **SIGE AI Consultant**! This project is a production-ready AI-powered customer support system specifically built for the **Science Institute for Global Education (SIGE)**. 
+
+It is now exclusively optimized for **Facebook Messenger**, leveraging Retrieval-Augmented Generation (RAG) to provide accurate study-abroad advice for Taiwan and integrating seamlessly with Google Sheets for real-time lead tracking.
 
 ---
 
 ## 🚀 Key Features
 
 - **💡 Intelligent RAG Consultant:** Uses **Ollama** and **FAISS** to answer complex questions about study-abroad programs, scholarships (1+4), and partner universities in Taiwan with high accuracy.
+- **🔢 Sequential Lead IDs:** Automatically tracks and assigns numeric IDs (e.g., "5", "6", "7") to new customers, keeping your records perfectly organized.
+- **💬 Facebook Messenger First:** Native integration with Meta's platform, including **Quick Replies** ("popups") for high-engagement follow-ups and a **Persistent Menu** for easy navigation.
 - **🔄 2-Way Google Sheets Sync:** Real-time synchronization between the local SQLite database and your "LEAD Sige" Google Sheet using a high-performance Webhook architecture.
-- **📝 Guided Lead Collection:** A structured, multi-choice Telegram conversation workflow that collects student profiles (Name, GPA, Language, etc.) and syncs them instantly to the sales team.
-- **🎯 Smart Intent Suggestion:** Root menu with quick-reply buttons (Scholarships, Programs, Contact) to guide users directly to the most frequent queries.
+- **📝 Professional Lead Collection:** A structured conversation workflow that collects student profiles (Name, Phone, GPA, Birth Year, etc.) with a built-in **Edit Engine** for user corrections.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Backend:** FastAPI (Python 3.10+)
-- **Bot Engine:** `python-telegram-bot` (v22+)
+- **Backend:** Flask / FastAPI (Python 3.10+)
+- **Bot Engine:** Facebook Graph API (v19+)
 - **LLM Engine:** Ollama (Qwen 2.5 / Nomic-embed-text)
 - **Database:** SQLite (Relational) + FAISS (Vector Store)
 - **Integration:** Google Apps Script (Webhook bridge)
@@ -29,8 +32,8 @@ Welcome to the **SIGE AI Consultant**! This project is a production-ready AI-pow
 
 - **Python 3.10 or higher**
 - **Ollama** (Download from [ollama.com](https://ollama.com/))
-- **Ngrok** (For exposing your local server to Google Sheets)
-- **A Telegram Bot Token** (Get it from [@BotFather](https://t.me/BotFather))
+- **Ngrok** (For exposing your local server to Facebook)
+- **Facebook Developer Account**: A Page Access Token, Verify Token, and App Secret.
 
 ### 2. Setup Environment
 
@@ -39,7 +42,10 @@ Clone the repository and enter the project directory:
 ```bash
 cd ai-agent-cs
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# Activate virtual environment
+# Windows: .venv\Scripts\activate
+# Linux/Mac: source .venv/bin/activate
+
 pip install -r requirements.txt
 ```
 
@@ -61,10 +67,11 @@ cp .env.example .env
 ```
 
 **Required Fields in `.env`:**
-- `TELEGRAM_BOT_TOKEN`: Your bot token from BotFather.
+- `FB_PAGE_ACCESS_TOKEN`: From your Meta Developer Portal.
+- `FB_VERIFY_TOKEN`: A string you define (e.g., `SIGE_BOT_2026`).
+- `FB_APP_SECRET`: From your Meta App settings.
 - `API_BASE_URL`: Your current Ngrok URL (e.g., `https://xxxx.ngrok-free.app`).
 - `SIGE_LEADS_SHEET_ID`: The ID of your Google Sheet.
-- `GOOGLE_SHEETS_WEBHOOK_URL`: The URL provided after deploying the Google Apps Script.
 
 ---
 
@@ -74,39 +81,49 @@ cp .env.example .env
 Before starting the bot, build the vector index from the SIGE documentation:
 
 ```bash
-python -m backend.data_scripts.ingest_sige
+python start_ingest.py
 ```
 
-### 2. Start the API Server (Webhook Handler)
-This handles the incoming data from Google Sheets:
+### 2. Configure Facebook UI
+Run the one-time setup to configure your bot's Welcome Message, Persistent Menu, and automatic Webhook subscription:
 
 ```bash
-python start_api_server.py
+python run_setup.py
 ```
 
-### 3. Start the Telegram Bot
-This starts the AI Consultant interface:
+### 3. Start the AI Bot
+Launch the primary Facebook Messenger handler:
 
 ```bash
-python start_telegram_bot.py
+python start_bot.py
 ```
 
 ---
 
-## 🔗 Google Sheets Integration
+## 🧹 Maintenance & Tools
 
-To enable 2-way sync:
-1. Open your Google Sheet.
-2. Go to **Extensions > Apps Script**.
-3. Paste the code provided in `backend/services/sheets_sync.js` (or similar reference).
-4. **Deploy** as a Web App (access: Anyone).
-5. Set the **On Edit** trigger in the Apps Script project to point to your `handleEditSync` function.
+### Resetting the Database
+If you need to clear your test data and restart the lead counter at #1:
+
+```bash
+python tmp/cleanup_db.py
+```
+
+### Deployment Diagnostics
+Located in `backend/tools/`:
+- `test_connection.py`: Verifies your Facebook Page Access Token.
+- `check_subscriptions.py`: Ensures your Webhook is correctly linked to your Page.
 
 ---
 
-## 👨‍💻 Contributing
+## 👨‍💻 Project Structure (Backend)
 
-This project is optimized for performance and reliability in the education sector. If you find bugs or want to suggest features, please open an issue or contact the SIGE technical team.
+- `backend/bot_server.py`: The primary Facebook Messenger handler (Flask).
+- `backend/tools/`: Utility scripts for platform-specific setup and diagnostics.
+- `backend/database/`: SQLite schema and data persistence logic.
+- `backend/services/`: Core logic for LLM, RAG retrieval, and scripted answers.
+
+---
 
 **SIGE - Science Institute for Global Education**  
 *Building Dreams, Connecting Global Talent.*

@@ -9,18 +9,26 @@ def start_ingest():
     """
     print("🚀 Starting SIGE Knowledge Base Ingestion...")
     
-    # Path to the .venv python executable
-    venv_python = os.path.join(".venv", "Scripts", "python.exe")
+    # Use absolute paths to be safe (no matter where the command is triggered from)
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    venv_python = os.path.join(project_root, ".venv", "Scripts", "python.exe")
+    
     if not os.path.exists(venv_python):
-        # fallback for linux/mac or local python if venv isn't found
+        # Fallback to system python if venv not found
         venv_python = "python"
 
     # Command to run the ingestion module
     cmd = [venv_python, "-m", "backend.data_scripts.ingest_sige"]
     
     try:
-        # Run the command and stream output
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        # Run the command and stream output, setting CWD to project root
+        process = subprocess.Popen(
+            cmd, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT, 
+            text=True,
+            cwd=project_root
+        )
         for line in process.stdout:
             print(line, end="")
         
@@ -28,7 +36,7 @@ def start_ingest():
         
         if process.returncode == 0:
             print("\n✅ Ingestion complete! The AI Consultant is now smarter.")
-            print("💡 Reminder: You must restart the Telegram Bot to use the new information.")
+            print("💡 Reminder: You must restart the SIGE Bot/Server to use the new information.")
         else:
             print(f"\n❌ Ingestion failed with exit code: {process.returncode}")
             
