@@ -22,13 +22,24 @@ logger = logging.getLogger(__name__)
 
 def get_ollama_embedding(text: str, model: str, base_url: str) -> List[float]:
     """
-    Get embedding via local Ollama /api/embeddings endpoint (compatible with Ollama 0.x).
+    Get embedding via local Ollama API.
+    Handles legacy /api/embeddings and modern /api/embed endpoints.
     """
+    # 1. Try Modern Endpoint (Ollama >= 0.1.33)
+    try:
+        url = f"{base_url}/api/embed"
+        payload = {"model": model, "input": text}
+        response = requests.post(url, json=payload, timeout=60)
+        if response.status_code == 200:
+            data = response.json()
+            if "embeddings" in data:
+                return data["embeddings"][0]
+    except Exception:
+        pass
+
+    # 2. Try Legacy Endpoint (Ollama < 0.1.33)
     url = f"{base_url}/api/embeddings"
-    payload = {
-        "model": model,
-        "prompt": text
-    }
+    payload = {"model": model, "prompt": text}
     try:
         response = requests.post(url, json=payload, timeout=60)
         response.raise_for_status()
@@ -61,10 +72,22 @@ class RAGService:
             
             self._load_vector_store()
             
+            # 3. Eagerly load fallback model to prevent lag on first failure
+            self.fallback_model = None
+            try:
+                from sentence_transformers import SentenceTransformer
+                logger.info(f"Pre-loading fallback embedding model (all-MiniLM-L6-v2) for efficiency...")
+                self.fallback_model = SentenceTransformer("all-MiniLM-L6-v2")
+            except Exception as e:
+                logger.warning(f"Could not pre-load fallback model: {e}")
+
             logger.info(
                 f"RAG service initialized with model: {embedding_model}, "
                 f"store: {self.vector_store_path}"
             )
+            
+            # 4. Perform a warmup call to Ollama (if available)
+            self.warmup()
         except Exception as e:
             logger.error(f"Failed to initialize RAG service: {e}")
             raise
@@ -80,12 +103,21 @@ class RAGService:
         except Exception:
             logger.warning(f"Ollama embedding failed for retrieval. trying library fallback...")
             
-        # 2. Fallback to local CPU sentence-transformers if needed
-        # (This should be avoided to prevent dimensionality mismatch)
-        from sentence_transformers import SentenceTransformer
-        logger.info("Using fallback SentenceTransformer...")
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-        return model.encode([text], show_progress_bar=False)[0].astype(np.float32)
+        # 2. Fallback to pre-loaded local CPU model
+        if self.fallback_model:
+            return self.fallback_model.encode([text], show_progress_bar=False)[0].astype(np.float32)
+        
+        # 3. Last resort dummy
+        return np.zeros(384, dtype=np.float32)
+
+    def warmup(self):
+        """Warm up the embedding engine by performing a dummy call."""
+        logger.info("🔥 Warming up embedding engine...")
+        try:
+            self.get_embedding("warmup")
+            logger.info("✅ Embedding engine warmed up.")
+        except Exception as e:
+            logger.warning(f"Warmup failed (this is usually okay if Ollama is still starting): {e}")
 
     def _load_vector_store(self):
         """Load existing vector store if available."""

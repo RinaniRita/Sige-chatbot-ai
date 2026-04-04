@@ -35,6 +35,10 @@ logger_name = "backend.fb_messenger"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Track startup time to ignore late messages from Facebook's queue
+SERVER_START_TIME = time.time()
+logger.info(f"🚀 Server startup time: {datetime.fromtimestamp(SERVER_START_TIME).strftime('%Y-%m-%d %H:%M:%S')}")
+
 app = Flask(__name__)
 
 @app.route("/", methods=["GET"])
@@ -68,6 +72,14 @@ def webhook():
         for entry in data.get("entry", []):
             for messaging_event in entry.get("messaging", []):
                 sender_id = messaging_event["sender"]["id"]
+                
+                # Filter out late messages sent while the bot was offline
+                event_time = messaging_event.get("timestamp")
+                if event_time:
+                    event_time_seconds = event_time / 1000.0
+                    if event_time_seconds < SERVER_START_TIME - 120:  # 2 minute buffer for clock drift
+                        logger.warning(f"⏩ Ignoring late event from {sender_id} (Queue latency: {SERVER_START_TIME - event_time_seconds:.1f}s)")
+                        continue
                 
                 # Handle Message
                 if messaging_event.get("message"):
