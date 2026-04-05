@@ -107,17 +107,66 @@ def handle_message(sender_id, text, payload=None):
     try:
         logger.info(f"Message from {sender_id}: {text} (Payload: {payload})")
         
-        # 1. Handle Active Lead Form Session
+        # 1. Check for global "Exit" or "Menu" intents (Always break out of form)
+        if text:
+            text_lc = text.lower().strip()
+            if text_lc in ["hi", "hello", "bắt đầu", "start", "chào", "menu", "🏠", "thoát", "hủy", "cancel"]:
+                if sender_id in SESSIONS:
+                    del SESSIONS[sender_id]
+                    logger.info(f"Form session cancelled by {sender_id}")
+                send_main_menu(sender_id)
+                return
+
+        # 2. Check for active form session
         if sender_id in SESSIONS:
+            # Smart Check: Is it an answer or a new question?
+            text_lc = text.lower() if text else ""
+            words = text.split() if text else []
+            
+            # Heuristic: If it looks like a question or contains info-seeking keywords
+            is_asking = any(k in text_lc for k in ["muốn", "hỏi", "thông tin", "trường", "phí", "sao", "về", "như thế nào"])
+            scripted_data = get_scripted_response(text) if text else None
+            
+            if (scripted_data or is_asking) and len(words) > 3:
+                # Answer the question but KEEP the session open
+                logger.info(f"Detected side-question from {sender_id} during form: {text}")
+                
+                if scripted_data:
+                    send_scripted_response(sender_id, scripted_data)
+                else:
+                    # Fallback to AI for the side question
+                    result = process_agent_query(text, sender_id)
+                    ai_resp = result.get("response")
+                    if isinstance(ai_resp, dict):
+                        send_scripted_response(sender_id, ai_resp)
+                    else:
+                        send_text_message(sender_id, ai_resp)
+                
+                send_text_message(sender_id, "💡 *Bạn có muốn tiếp tục điền thông tin đăng ký không?* (Nếu muốn dừng lại hoàn toàn, hãy nhắn 'Thoát')")
+                return
+                
             handle_lead_form(sender_id, text, payload)
             return
 
-        # 2. Check for navigation keywords
-        if text and text.lower() in ["hi", "hello", "bắt đầu", "start", "chào", "menu"]:
-            send_main_menu(sender_id)
-            return
+        # 3. Check for navigation/info keywords (Professional Auto-Routing)
+        if text:
+            text_lc = text.lower().strip()
+            
+            # Quick Financial Routing
+            if any(k in text_lc for k in ["chi phí", "giá", "bao nhiêu tiền"]):
+                scripted_data = get_scripted_response("chi phí")
+                if scripted_data:
+                    send_scripted_response(sender_id, scripted_data)
+                    return
 
-        # 3. Fallback to RAG / AI Agent
+            # Quick Document/Process Routing
+            if any(k in text_lc for k in ["hồ sơ", "quy trình", "thủ tục"]):
+                scripted_data = get_scripted_response("hồ sơ")
+                if scripted_data:
+                    send_scripted_response(sender_id, scripted_data)
+                    return
+
+        # 4. Fallback to RAG / AI Agent
         result = process_agent_query(text, sender_id)
         response = result.get("response")
         
@@ -152,8 +201,21 @@ def handle_lead_form(sender_id, text, payload=None):
     # Step-by-step logic (Special case: If editing, jump back to summary)
     if session.get("is_editing"):
         # Save the edited field and reset flag
-        if step == NAME: data["fb_name"] = text
-        elif step == PHONE: data["phone"] = text
+        if step == NAME:
+            words = text.strip().split()
+            if len(words) != 2:
+                send_text_message(sender_id, "❌ Vui lòng nhập đầy đủ 2 từ gồm Họ và Tên của bạn (Ví dụ: Nguyễn A):")
+                return
+            if any(char.isdigit() for char in text):
+                send_text_message(sender_id, "❌ Họ tên không được chứa con số. Vui lòng nhập lại:")
+                return
+            data["fb_name"] = text
+        elif step == PHONE:
+            phone = text.strip().replace(" ", "").replace(".", "")
+            if not re.match(r"^(0|84)(3|5|7|8|9)([0-9]{8})$", phone):
+                send_text_message(sender_id, "❌ Số điện thoại không hợp lệ! Vui lòng nhập lại số Việt Nam (10 số):")
+                return
+            data["phone"] = phone
         elif step == EMAIL:
             email = text.strip()
             if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", email):
@@ -162,25 +224,33 @@ def handle_lead_form(sender_id, text, payload=None):
             data["email"] = email
         elif step == BIRTH_YEAR:
             try:
-                year = int(text.strip())
-                if 2026 - year < 18:
-                    send_text_message(sender_id, "⚠️ Cảnh báo: Bạn cần đủ 18 tuổi. Vui lòng kiểm tra lại:")
+                year_str = text.strip()
+                if not re.match(r"^\d{4}$", year_str):
+                    send_text_message(sender_id, "❌ Năm sinh phải là 4 con số (ví dụ: 2005). Vui lòng nhập lại:")
+                    return
+                year = int(year_str)
+                current_year = datetime.now().year
+                if year < 1960 or year > current_year - 15:
+                    send_text_message(sender_id, f"❌ Năm sinh không hợp lệ hoặc bạn quá nhỏ tuổi. Vui lòng nhập lại:")
                     return
                 data["birth_year"] = str(year)
             except ValueError:
-                send_text_message(sender_id, "Vui lòng nhập năm sinh là số:")
+                send_text_message(sender_id, "Vui lòng nhập năm sinh là số (ví dụ: 2005):")
                 return
         elif step == GPA:
             try:
                 raw_text = text.replace(",", ".")
                 raw_val = float(raw_text)
+                if raw_val > 100:
+                    send_text_message(sender_id, "❌ Điểm GPA không thể vượt quá 100. Vui lòng nhập lại:")
+                    return
                 gpa_val = raw_val if raw_val <= 10 else raw_val / 10
                 if gpa_val < 6.0:
-                    send_text_message(sender_id, "⚠️ GPA tối thiểu 6.0. Vui lòng nhập lại:")
+                    send_text_message(sender_id, "⚠️ GPA tối thiểu 6.0. Vui lòng nhập lại điểm chính xác:")
                     return
                 data["gpa"] = str(round(gpa_val, 2))
             except ValueError:
-                send_text_message(sender_id, "Vui lòng nhập GPA hợp lệ:")
+                send_text_message(sender_id, "Vui lòng nhập GPA hợp lệ (ví dụ: 8.5 hoặc 85):")
                 return
         elif step == ASPIRATION:
             data["aspiration"] = text
@@ -192,12 +262,25 @@ def handle_lead_form(sender_id, text, payload=None):
 
     # Normal Step Logic
     if step == NAME:
+        words = text.strip().split()
+        if len(words) != 2:
+            send_text_message(sender_id, "❌ Vui lòng nhập đầy đủ 2 từ gồm Họ và Tên của bạn (Ví dụ: Nguyễn A):")
+            return
+        if any(char.isdigit() for char in text):
+            send_text_message(sender_id, "❌ Họ tên không được chứa con số. Vui lòng nhập lại Họ và Tên của bạn:")
+            return
+            
         data["fb_name"] = text
         session["step"] = PHONE
         send_text_message(sender_id, "Cảm ơn! Số điện thoại/Zalo của bạn là gì để chuyên viên liên hệ?")
     
     elif step == PHONE:
-        data["phone"] = text
+        phone = text.strip().replace(" ", "").replace(".", "")
+        # Basic VN Phone Regex (10 digits, starts with 0 or 84)
+        if not re.match(r"^(0|84)(3|5|7|8|9)([0-9]{8})$", phone):
+            send_text_message(sender_id, "❌ Số điện thoại không hợp lệ! Vui lòng nhập lại số điện thoại Việt Nam (10 số):")
+            return
+        data["phone"] = phone
         session["step"] = EMAIL
         send_text_message(sender_id, "Địa chỉ Email của bạn là gì?")
 
@@ -213,30 +296,52 @@ def handle_lead_form(sender_id, text, payload=None):
 
     elif step == BIRTH_YEAR:
         try:
-            year = int(text.strip())
-            age = 2026 - year
-            if age < 18:
-                send_text_message(sender_id, "⚠️ Cảnh báo: Bạn cần đủ 18 tuổi để tham gia. Vui lòng kiểm tra lại năm sinh:")
+            year_str = text.strip()
+            # 1. Check for 4-digit format
+            if not re.match(r"^\d{4}$", year_str):
+                send_text_message(sender_id, "❌ Năm sinh phải là 4 con số (ví dụ: 2005). Vui lòng nhập lại chính xác:")
                 return
+            
+            year = int(year_str)
+            current_year = datetime.now().year
+            age = current_year - year
+            
+            # 2. Check for reasonable range (1960 - 2012 for students)
+            if year < 1960 or year > current_year - 14:
+                send_text_message(sender_id, "❌ Năm sinh không hợp lệ hoặc bạn không đủ điều kiện độ tuổi du học. Vui lòng nhập lại:")
+                return
+                
             data["birth_year"] = str(year)
             session["step"] = GPA
             send_text_message(sender_id, "Điểm trung bình (GPA) gần nhất của bạn là bao nhiêu? (Ví dụ: 8.5 hoặc 75)\n\n💡 GPA từ 6.0 trở lên là điều kiện tối thiểu.")
         except ValueError:
             send_text_message(sender_id, "Vui lòng nhập năm sinh là con số (ví dụ: 2005):")
+            return
 
     elif step == GPA:
         try:
             raw_text = text.replace(",", ".")
             raw_val = float(raw_text)
+            
+            # 1. Cap at 100
+            if raw_val > 100:
+                send_text_message(sender_id, "❌ Điểm GPA không hợp lệ (tối đa là 100). Vui lòng nhập lại điểm chính xác của bạn:")
+                return
+                
+            # 2. Normalize to 10-point scale (e.g. 85 -> 8.5)
             gpa_val = raw_val if raw_val <= 10 else raw_val / 10
+            
+            # 3. Minimum requirement check
             if gpa_val < 6.0:
                 send_text_message(sender_id, "⚠️ Hiện tại SIGE yêu cầu GPA tối thiểu 6.0. Vui lòng nhập lại điểm chính xác:")
                 return
+                
             data["gpa"] = str(round(gpa_val, 2))
             session["step"] = LANGUAGE
             send_language_selection(sender_id)
         except ValueError:
-            send_text_message(sender_id, "Vui lòng nhập điểm GPA hợp lệ (ví dụ: 7.5):")
+            send_text_message(sender_id, "Vui lòng nhập điểm GPA hợp lệ (ví dụ: 7.5 hoặc 80):")
+            return
 
     elif step == LANGUAGE:
         # Expected either text or postback from quick replies
@@ -316,7 +421,8 @@ def process_final_confirmation(sender_id):
     
     lead_record = {
         "id": lead_id,
-        "created_date": datetime.now().strftime("%Y-%m-%d"),
+        "signup_time": datetime.now().strftime("%Y/%m/%d"), # REQUIRED for Column B in Google Sheet
+        "created_date": datetime.now().strftime("%Y/%m/%d"),
         "name": data.get("fb_name"), # For Google Sheets (fixes missing name)
         "fb_name": data.get("fb_name"), # For Local Database parity
         "phone": data.get("phone"),
@@ -391,6 +497,9 @@ def handle_postback(sender_id, payload):
             SESSIONS[sender_id] = {"step": NAME, "data": {}, "is_editing": False}
             send_text_message(sender_id, "Bắt đầu lại. Họ tên của bạn là gì?")
 
+        elif payload == "show_program_menu":
+            send_program_menu(sender_id)
+
         elif payload.startswith("ask_"):
             # Map key (remove 'ask_' if needed, but handles both 'ask_key' and 'key')
             key = payload.replace("ask_", "")
@@ -406,6 +515,9 @@ def handle_postback(sender_id, payload):
                 else:
                     send_text_message(sender_id, "Thông tin này đang được cập nhật.")
         
+        elif payload == "show_contact":
+            send_text_message(sender_id, "📞 Hotline SIGE: 0938491111\n📍 Địa chỉ: Tòa VINATA 2B, 289 Khuất Duy Tiến, Hà Nội.\n\nBạn có thể nhắn tin trực tiếp tại đây hoặc gọi điện để được hỗ trợ 24/7!")
+
         send_typing_indicator(sender_id, "typing_off")
         
     except Exception as e:
@@ -460,7 +572,7 @@ def send_follow_up_menu(recipient_id):
                 {
                     "content_type": "text", 
                     "title": "🎓 Săn học bổng", 
-                    "payload": "ask_hocbong14"
+                    "payload": "ask_hoc_bong_14"
                 },
                 {
                     "content_type": "text", 
@@ -473,19 +585,56 @@ def send_follow_up_menu(recipient_id):
     requests.post("https://graph.facebook.com/v19.0/me/messages", params=params, json=data)
 
 def send_main_menu(recipient_id):
-    """Send the 5-category main menu as buttons."""
+    """Send the Tier-1 elite main menu with a "Big" professional introduction."""
     welcome_text = (
-        "🚀 Hệ sinh thái Du học SIGE - Tuyển sinh Kỳ 3/2026\n\n"
-        "Chào mừng bạn đến với SIGE AI! Dựa trên 20 năm kinh nghiệm của Viện trưởng Nguyễn Thị Điệp."
+        "🚀 **VIỆN KHOA HỌC GIÁO DỤC TOÀN CẦU (SIGE) - KỲ TUYỂN SINH 3/2026**\n\n"
+        "Chào mừng bạn đến với SIGE AI - Hệ thống hỗ trợ du học Đài Loan chuyên nghiệp được bảo trợ bởi ThS. Nguyễn Thị Điệp.\n\n"
+        "✨ **Tại sao bạn chọn Hệ sinh thái SIGE?**\n"
+        "• **20 Năm Uy Tín:** Mạng lưới liên kết trực tiếp với các trường đại học hàng đầu Đài Loan.\n"
+        "• **Bảo Trợ Trọn Đời:** Chúng tôi không chỉ đưa bạn đi học, mà còn đồng hành cùng bạn từ lúc bay đến khi ổn định nghề nghiệp và định cư.\n"
+        "• **Quỹ Học Bổng Doanh Nghiệp:** Cơ hội nhận học bổng 100% học phí và trợ cấp sinh hoạt lên tới 8 triệu VNĐ/tháng.\n\n"
+        "✨ **Thông điệp từ Viện trưởng:**\n"
+        "> *'Sự thành công của sinh viên là thước đo giá trị lớn nhất của Viện SIGE. Chúng tôi cam kết mang lại lộ trình du học an toàn và triển vọng nhất cho tương lai của bạn.'*\n\n"
+        "Bạn muốn khám phá thông tin nào nhất để bắt đầu hành trình của mình? 👇"
     )
     
+    # 1. Send the "Big" introduction text first
+    send_text_message(recipient_id, welcome_text)
+    
+    # 2. Add delay for professional feel
+    send_typing_indicator(recipient_id, "typing_on")
+    import time
+    time.sleep(1.5)
+    
+    # 3. Send the menu buttons separately
     buttons = [
-        {"type": "postback", "title": "🎓 Săn Học Bổng 2026", "payload": "ask_hocbong14"},
-        {"type": "postback", "title": "💰 Bảng Phí & Dịch Vụ", "payload": "ask_hocbong"},
-        {"type": "postback", "title": "💼 Việc Làm & Lương", "payload": "ask_vieclam"}
+        {"type": "postback", "title": "🎓 Săn Học Bổng", "payload": "ask_hoc_bong_chung"},
+        {"type": "postback", "title": "🏨 Danh Sách Trường", "payload": "ask_danh_sach_truong"},
+        {"type": "postback", "title": "✨ Các Hệ Du Học", "payload": "show_program_menu"}
     ]
     
-    send_button_message(recipient_id, welcome_text, buttons)
+    prompt_text = "Chọn mục bạn quan tâm bên dưới:"
+    send_button_message(recipient_id, prompt_text, buttons)
+
+def send_program_menu(recipient_id):
+    """Send the Tier-2 Program menu."""
+    text = "🔍 KHÁM PHÁ CÁC CHƯƠNG TRÌNH ĐÀO TẠO\n\nChọn hệ du học bạn muốn tìm hiểu chi tiết:"
+    
+    buttons = [
+        {"type": "postback", "title": "🎯 Hệ Dự bị 1+4", "payload": "ask_hoc_bong_14"},
+        {"type": "postback", "title": "💆 Hệ Vừa Học Làm", "payload": "ask_he_vhvl_detail"},
+        {"type": "postback", "title": "🎨 Các Hệ Khác", "payload": "show_program_menu_extra"}
+    ]
+    send_button_message(recipient_id, text, buttons)
+    
+    # Send second card if needed for more options
+    text_extra = "Các bậc học cao hơn và hệ ngôn ngữ:"
+    buttons_extra = [
+        {"type": "postback", "title": "🎓 Hệ Thạc Sĩ", "payload": "ask_he_thac_si_detail"},
+        {"type": "postback", "title": "🗣️ Hệ Ngôn Ngữ", "payload": "ask_he_ngon_ngu_detail"},
+        {"type": "postback", "title": "🏠 Quay lại Menu", "payload": "GET_STARTED"}
+    ]
+    send_button_message(recipient_id, text_extra, buttons_extra)
 
 def send_button_message(recipient_id, text, buttons):
     """Send a message with up to 3 buttons (FB Limit per message in generic button template)."""
@@ -509,7 +658,12 @@ def send_button_message(recipient_id, text, buttons):
         logger.error(f"Error sending buttons: {r.text}")
 
 def send_scripted_response(recipient_id, scripted_data):
-    """Format and send response from SCRIPTED_ANSWERS."""
+    """
+    Format and send response from SCRIPTED_ANSWERS.
+    To allow for "Big" professional responses (image 2 style), 
+    we send the main body as a clean text message first,
+    then follow up with the buttons in a separate small bubble.
+    """
     text = scripted_data["text"]
     buttons_data = scripted_data.get("buttons", [])
     
@@ -517,16 +671,24 @@ def send_scripted_response(recipient_id, scripted_data):
         send_text_message(recipient_id, text)
         return
         
-    # Facebook limited to 3 buttons per message. Split if needed? 
-    # For now, take first 3.
+    # 1. Send the "Big" main text body first (up to 2000 chars)
+    send_text_message(recipient_id, text)
+    
+    # 2. Add a small delay/typing feel (optional)
+    send_typing_indicator(recipient_id, "typing_on")
+    import time
+    time.sleep(1) 
+
+    # 3. Create the buttons with a simple instruction
     fb_buttons = []
-    for b in buttons_data[:3]:
+    for b in buttons_data[:3]: # FB limit is 3 buttons
         if "url" in b:
             fb_buttons.append({"type": "web_url", "url": b["url"], "title": b["text"]})
         else:
             fb_buttons.append({"type": "postback", "title": b["text"], "payload": b["callback"]})
             
-    send_button_message(recipient_id, text, fb_buttons)
+    prompt_text = "Bạn muốn thực hiện bước nào tiếp theo? 👇"
+    send_button_message(recipient_id, prompt_text, fb_buttons)
 
 if __name__ == "__main__":
     # Validation Check at Startup
