@@ -75,28 +75,48 @@ cp .env.example .env
 
 ---
 
-## 🏃 Running the System
+## 🚀 Automation & Startup Sequence
 
-### 1. Ingest Knowledge Base
-Before starting the bot, build the vector index from the SIGE documentation:
+To make deployment as simple as possible, the project includes several automation scripts in the root directory. Follow this sequence for a complete setup:
 
-```bash
-python start_ingest.py
-```
-
-### 2. Configure Facebook UI
-Run the one-time setup to configure your bot's Welcome Message, Persistent Menu, and automatic Webhook subscription:
-
+### 1️⃣ Step 1: Initialize Facebook UI
+Run this **once** (or whenever you change your menu/greeting) to configure the Messenger interface:
 ```bash
 python run_setup.py
 ```
+*Configures: Welcome Message, "Get Started" button, and the Persistent Menu.*
 
-### 3. Start the AI Bot
-Launch the primary Facebook Messenger handler:
+### 2️⃣ Step 2: Build the Knowledge Base
+Process your markdown documents in `SIGE_KB/` to update the AI's "brain":
+```bash
+python start_ingest.py
+```
+*Creates: FAISS vector index and metadata for RAG retrieval.*
 
+### 3️⃣ Step 3: Start the API Server (Backend)
+Launch the FastAPI server to handle database initialization and Google Sheets sync:
+```bash
+python start_api_server.py
+```
+*Handles: `init_db()`, 2-way Google Sheets sync (Port 8000), and lead verification.*
+
+### 4️⃣ Step 4: Start the AI Bot (Interface)
+Finally, start the main interaction layer to begin chatting with students:
 ```bash
 python start_bot.py
 ```
+*Handles: Real-time Messenger chats, Lead Forms, and AI responses (Port 5000).*
+
+---
+
+## 🛠️ Script Summary
+
+| Script | Function | Role |
+| :--- | :--- | :--- |
+| `run_setup.py` | Facebook Platform Setup | Configuration |
+| `start_ingest.py` | RAG Knowledge Ingestion | AI Training |
+| `start_api_server.py`| Lead Sync & DB initialization | Data Backend |
+| `start_bot.py` | Messenger Webhook Handler | User Interface |
 
 ---
 
@@ -119,6 +139,7 @@ Located in `backend/tools/`:
 ## 👨‍💻 Project Structure (Backend)
 
 - `backend/bot_server.py`: The primary Facebook Messenger handler (Flask).
+- `backend/api_server.py`: The data-layer and sync handler (FastAPI).
 - `backend/tools/`: Utility scripts for platform-specific setup and diagnostics.
 - `backend/database/`: SQLite schema and data persistence logic.
 - `backend/services/`: Core logic for LLM, RAG retrieval, and scripted answers.
