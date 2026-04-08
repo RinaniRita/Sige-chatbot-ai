@@ -1,5 +1,5 @@
 """
-Agent Router — SIGE Education Consultant AI Agent
+Agent Router — SIGE Education AI Agent
 ================================================
 Uses Ollama to process user queries about SIGE programs and Taiwanese universities.
 Focuses on RAG-based information retrieval.

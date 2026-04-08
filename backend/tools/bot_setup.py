@@ -28,7 +28,7 @@ def setup_messenger_profile():
         "greeting": [
             {
                 "locale": "default",
-                "text": "Chào mừng bạn đến với SIGE AI! 🚀\nChúng tôi hỗ trợ lộ trình du học Đài Loan chuyên nghiệp dựa trên 20 năm tâm huyết.\n\nNhấn 'Bắt đầu' để khám phá học bổng kỳ 3/2026!"
+                "text": "Chào mừng bạn đến với SIGE AI! 🚀\nChúng tôi hỗ trợ lộ trình du học Đài Loan chuyên nghiệp dựa trên 20 năm tâm huyết.\n\nNhấn 'Bắt đầu' để khám phá học bổng kỳ 9/2026!"
             }
         ],
         "persistent_menu": [
@@ -45,12 +45,6 @@ def setup_messenger_profile():
                         "type": "postback",
                         "title": "🚀 Đăng Ký Tư Vấn",
                         "payload": "start_lead_form"
-                    },
-                    {
-                        "type": "web_url",
-                        "title": "📞 Liên Hệ Zalo",
-                        "url": "https://zalo.me/0938491111",
-                        "webview_height_ratio": "full"
                     }
                 ]
             }

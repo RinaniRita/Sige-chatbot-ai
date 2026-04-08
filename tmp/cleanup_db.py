@@ -31,8 +31,11 @@ def cleanup_database():
         # 2. Delete all records
         cursor.execute("DELETE FROM customer_leads;")
         
-        # 3. Reset auto-increment sequence (if any)
-        cursor.execute("DELETE FROM sqlite_sequence WHERE name='customer_leads';")
+        # 3. Reset auto-increment sequence (only if the table exists)
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence';")
+        if cursor.fetchone():
+            cursor.execute("DELETE FROM sqlite_sequence WHERE name='customer_leads';")
+            print("🔢 Reset auto-increment sequence.")
         
         conn.commit()
         print("✅ SUCCESS: 'customer_leads' table is now empty.")

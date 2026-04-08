@@ -20,6 +20,7 @@ TOP_K = int(os.getenv("TOP_K", 4))
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", 0.30))
 CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", 0.75))
 MAX_OUTPUT_TOKENS = int(os.getenv("MAX_OUTPUT_TOKENS", 2048))
+LLM_TEMPERATURE = float(os.getenv("LLM_TEMPERATURE", 0.4))
 # Chunking settings
 # --------------------------------------------------
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 500))
@@ -40,6 +41,11 @@ DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+
+# Whitelist for user IDs that should NEVER be blocked
+WHITELIST_PSIDS = [
+    pid.strip() for pid in os.getenv("WHITELIST_PSIDS", "").split(",") if pid.strip()
+]
 
 # --------------------------------------------------
 # Optional / future settings

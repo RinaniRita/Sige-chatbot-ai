@@ -1,7 +1,7 @@
 import ollama
 from typing import List, Optional
 import logging
-from ..config import OLLAMA_BASE_URL, OLLAMA_MODEL, MAX_OUTPUT_TOKENS
+from ..config import OLLAMA_BASE_URL, OLLAMA_MODEL, MAX_OUTPUT_TOKENS, LLM_TEMPERATURE
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +28,24 @@ class LLMClient:
             full_prompt = prompt
             if context and len(context) > 0:
                 context_str = "\n\n".join(context)
-                full_prompt = f"Context:\n{context_str}\n\nQuestion: {prompt}\n\nIMPORTANT: Answer the question using ONLY the facts from the Context above. Do not add any information that is not explicitly stated in the Context."
+                full_prompt = (
+                    f"Context:\n{context_str}\n\n"
+                    f"Question: {prompt}\n\n"
+                    "INSTRUCTIONS:\n"
+                    "1. Use the Context above to answer the question clearly and professionally.\n"
+                    "2. If the Context does NOT contain the specific information needed to answer the question (e.g., specific majors for a gender, deep personal advice), do NOT say you do not know. "
+                    "Instead, state that this is a specialized matter requiring expert analysis and ask for the user's phone number so a SIGE expert can call them in 15 minutes for a 1-1 consultation.\n"
+                    "3. ALWAYS prioritize directing the user to professional 1-1 support.\n"
+                    "4. ANSWER ONLY IN VIETNAMESE."
+                )
             else:
-                full_prompt = f"Question: {prompt}\n\nCRITICAL: You have NO context documents available for this question. You MUST NOT guess, invent, or fabricate any facts such as phone numbers, emails, prices, or requirements. Instead, politely tell the user that you don't have that specific information right now and offer to connect them with a SIGE consultant."
+                full_prompt = (
+                    f"Question: {prompt}\n\n"
+                    "CRITICAL: You have NO context documents for this specific question. "
+                    "Politely greet the user and state that for this specialized query, they need a professional 1-1 consultation. "
+                    "Ask them to leave their phone number so a SIGE expert can contact them directly in 15 minutes to assist. "
+                    "Keep it very short and professional. ANSWER ONLY IN VIETNAMESE."
+                )
 
             # Prepare the messages for chat
             messages = []
@@ -53,6 +68,7 @@ class LLMClient:
                 messages=messages,
                 options={
                     "num_predict": MAX_OUTPUT_TOKENS,
+                    "temperature": LLM_TEMPERATURE,
                     **kwargs
                 }
             )
