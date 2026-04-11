@@ -159,6 +159,9 @@ cython_debug/
 .opencode/
 .codebuddy/
 
+# Temporary files
+tmp/
+
 # Project Specific Data
 data/*.db
 data/*.db-journal
