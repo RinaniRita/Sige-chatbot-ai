@@ -1,0 +1,9 @@
+{
+    "files.exclude": {
+        ".env": true,
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/__pycache__": true
+    }
+}
