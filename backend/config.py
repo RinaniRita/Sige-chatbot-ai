@@ -42,9 +42,30 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
+# Facebook Messenger Configuration
+FB_PAGE_ACCESS_TOKEN = os.getenv("FB_PAGE_ACCESS_TOKEN")
+FB_VERIFY_TOKEN = os.getenv("FB_VERIFY_TOKEN", "SIGE_BOT_2026")
+FB_APP_SECRET = os.getenv("FB_APP_SECRET")
+
 # Whitelist for user IDs that should NEVER be blocked
 WHITELIST_PSIDS = [
     pid.strip() for pid in os.getenv("WHITELIST_PSIDS", "").split(",") if pid.strip()
+]
+
+# App IDs that represent bots/automation (to exclude from human intervention detection)
+# 921841513979535: SIGE AI Bot
+BOT_APP_IDS = [
+    aid.strip() for aid in os.getenv("BOT_APP_IDS", "921841513979535").split(",") if aid.strip()
+]
+
+# Shared Messenger Inbox App ID (Meta Business Suite)
+# This ID is used for both ad automation AND human replies.
+SHARED_INBOX_APP_ID = "263902037430900"
+
+# Specific text patterns for ad automation messages that should NOT trigger a bot pause.
+AD_AUTOMATION_PATTERNS = [
+    r"(?s)Chào bạn, để Viện SIGE tư vấn chính xác lộ trình và học bổng.*Bạn đang học/đã tốt nghiệp THPT",
+    r"(?s)Xin chào .* Bạn có câu hỏi nào cần trao đổi thêm với chúng tôi không\?"
 ]
 
 # --------------------------------------------------

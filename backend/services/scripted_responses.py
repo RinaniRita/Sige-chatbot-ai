@@ -10,30 +10,30 @@ MAIN_2_BUTTONS = [
 SCRIPTED_ANSWERS = {
     # ================== 10 CASES TÂM LÝ ==================
     "case_1_dat_lich": {
-        "text": """Chào bạn! Cảm ơn bạn đã liên hệ SIGE. 🎓✨\n\nBạn vui lòng để lại Số điện thoại để chuyên gia cấp cao gọi lại hỗ trợ lộ trình DU HỌC ĐÀI LOAN sớm nhất nhé👇""",
+        "text": """Chào bạn! Cảm ơn bạn đã liên hệ SIGE. 🎓✨\n\nBạn vui lòng để lại Số điện thoại để cán bộ tuyển sinh cấp cao gọi lại hỗ trợ lộ trình DU HỌC ĐÀI LOAN sớm nhất nhé👇""",
         "buttons": MAIN_2_BUTTONS
     },
 
     "case_2_chi_phi": {
-        "text": """Chào bạn, gói dịch vụ du học bên SIGE trọn gói chỉ từ 36 cho đến 55 triệu với các hệ miễn 100% học phí hoặc thực tập có lương.\n\nBạn vui lòng bấm nút bên dưới để chuyên gia định hướng lộ trình phù hợp với tài chính gia đình nhé👇""",
+        "text": """Chào bạn, gói dịch vụ du học bên SIGE trọn gói chỉ từ 36 cho đến 55 triệu với các hệ miễn 100% học phí hoặc thực tập có lương.\n\nBạn vui lòng bấm nút bên dưới để cán bộ tuyển sinh định hướng lộ trình phù hợp với tài chính gia đình nhé👇""",
         "buttons": MAIN_2_BUTTONS
     },
 
     "case_3_chon_nganh": {
-        "text": """Chào bạn! Với hơn 20 năm kinh nghiệm B2B tại Đài Loan, SIGE cam kết chọn đúng trường, đúng ngành và bảo chứng việc làm đầu ra. 🎓✨\n\nBấm nút bên dưới để chuyên gia của SIGE hỗ trợ trực tiếp cho bạn nhé👇""",
+        "text": """Chào bạn! Với hơn 20 năm kinh nghiệm B2B tại Đài Loan, SIGE cam kết chọn đúng trường, đúng ngành và bảo chứng việc làm đầu ra. 🎓✨\n\nBấm nút bên dưới để cán bộ tuyển sinh của SIGE hỗ trợ trực tiếp cho bạn nhé👇""",
         "buttons": MAIN_2_BUTTONS
     },
 
     "case_4_like_tuong_tac": {
         "text": (
-            "Để chuyên viên SIGE hỗ trợ cho bạn tốt nhất, vui lòng để lại số điện thoại."
+            "Để cán bộ tuyển sinh SIGE hỗ trợ cho bạn tốt nhất, vui lòng để lại số điện thoại."
         )
     },
 
     "nudge_proactive_follow_up": {
         "text": """Bạn ơi, không biết thông tin trên đã giúp ích được cho mình chưa? ✨
-
-Để tiết kiệm thời gian, chuyên gia SIGE có thể gọi điện giải đáp 1-1 cho bạn trong 15 phút tới không? Chỉ cần để lại SĐT thôi ạ! 🎯""",
+ 
+ Để tiết kiệm thời gian, cán bộ tuyển sinh SIGE có thể gọi điện giải đáp 1-1 cho bạn trong 15 phút tới không? Chỉ cần để lại SĐT thôi ạ! 🎯""",
         "buttons": [
             {"text": "📞 Gửi SĐT ngay", "callback": "start_lead_form"},
             {"text": "🏠 Xem Menu chính", "callback": "GET_STARTED"}
@@ -41,22 +41,22 @@ SCRIPTED_ANSWERS = {
     },
 
     "case_5_dich_vu": {
-        "text": """Chào bạn! SIGE không chỉ xử lý hồ sơ mà còn cam kết bảo chứng 100% cơ hội việc làm sau khi sang Đài Loan. 🎓✨\n\nVui lòng bấm vào nút dưới đây để kết nối với chuyên viên tư vấn ngay! 👇""",
+        "text": """Chào bạn! SIGE không chỉ xử lý hồ sơ mà còn cam kết bảo chứng 100% cơ hội việc làm sau khi sang Đài Loan. 🎓✨\n\nVui lòng bấm vào nút dưới đây để kết nối với cán bộ tuyển sinh tư vấn ngay! 👇""",
         "buttons": MAIN_2_BUTTONS
     },
 
     "case_6_nghi_van": {
-        "text": """Chào bạn! Quyền lợi "học bổng" hay "bảo chứng việc làm" tại SIGE là cam kết có thật từ mạng lưới doanh nghiệp hơn 20 năm qua. 🎓✨\n\nBấm nút bên dưới để chuyên gia hỗ trợ bạn kiểm chứng thông tin trực tiếp nhé! 👇""",
+        "text": """Chào bạn! Quyền lợi "học bổng" hay "bảo chứng việc làm" tại SIGE là cam kết có thật từ mạng lưới doanh nghiệp hơn 20 năm qua. 🎓✨\n\nBấm nút bên dưới để cán bộ tuyển sinh hỗ trợ bạn kiểm chứng thông tin trực tiếp nhé! 👇""",
         "buttons": MAIN_2_BUTTONS
     },
 
     "case_7_phu_huynh": {
-        "text": """Tại phiên làm việc sắp tới, chuyên gia SIGE rất sẵn lòng mời cả phụ huynh cùng tham gia để phân tích rõ bài toán tài chính và hợp đồng. 👨‍👩‍👧\n\nVui lòng bấm nút bên dưới thiết lập cuộc gọi cho cả gia đình nhé 👇""",
+        "text": """Tại phiên làm việc sắp tới, cán bộ tuyển sinh SIGE rất sẵn lòng mời cả phụ huynh cùng tham gia để phân tích rõ bài toán tài chính và hợp đồng. 👨‍👩‍👧\n\nVui lòng bấm nút bên dưới thiết lập cuộc gọi cho cả gia đình nhé 👇""",
         "buttons": MAIN_2_BUTTONS
     },
 
     "case_9_ngu_dong": {
-        "text": """Hồ sơ của bạn đang bảo lưu. Lịch hẹn trống của chuyên gia tuần này chỉ còn 3 suất.\n\nVui lòng bấm nút dưới đây để thiết lập lịch ưu tiên ngay hôm nay! 👇""",
+        "text": """Hồ sơ của bạn đang bảo lưu. Lịch hẹn trống của cán bộ tuyển sinh tuần này chỉ còn 3 suất.\n\nVui lòng bấm nút dưới đây để thiết lập lịch ưu tiên ngay hôm nay! 👇""",
         "buttons": MAIN_2_BUTTONS
     },
 
@@ -67,14 +67,14 @@ SCRIPTED_ANSWERS = {
 
     # ================== LOGIC PHÂN NHÁNH 2 (HOOKS) ==================
     "hook_14": {
-        "text": """Hệ 1+4 (Hệ dự bị Đại học): Dành cho các bạn chưa có tiếng Trung. Học 1 năm tiếng, sau đó học tiếp 4 năm Đại học chính quy.\n\nBạn có muốn chuyên viên tư vấn trực tiếp lộ trình này ngay bây giờ không?""",
+        "text": """Hệ 1+4 (Hệ dự bị Đại học): Dành cho các bạn chưa có tiếng Trung. Học 1 năm tiếng, sau đó học tiếp 4 năm Đại học chính quy.\n\nBạn có muốn cán bộ tuyển sinh tư vấn trực tiếp lộ trình này ngay bây giờ không?""",
         "buttons": [
             {"text": "📞 Liên hệ ngay cho tôi", "callback": "start_lead_form"}
         ]
     },
 
     "hook_vhvl": {
-        "text": """Hệ Vừa Học Vừa Làm: Cơ hội rèn luyện và thực tập hưởng lương 18-25tr/tháng ngay từ năm nhất. Thích hợp cho bạn muốn tự chủ tài chính.\n\nBạn có muốn chuyên viên tư vấn trực tiếp lộ trình này ngay bây giờ không?""",
+        "text": """Hệ Vừa Học Vừa Làm: Cơ hội rèn luyện và thực tập hưởng lương 18-25tr/tháng ngay từ năm nhất. Thích hợp cho bạn muốn tự chủ tài chính.\n\nBạn có muốn cán bộ tuyển sinh tư vấn trực tiếp lộ trình này ngay bây giờ không?""",
         "buttons": [
             {"text": "📞 Liên hệ ngay cho tôi", "callback": "start_lead_form"}
         ]
@@ -86,12 +86,12 @@ SCRIPTED_ANSWERS = {
 
 Dạ, SIGE tự hào là đối tác tuyển sinh trực tiếp của các trường Top đầu Đài Loan như: ĐH Minh Truyền, ĐH Lĩnh Đông, ĐH Đài Cương...
 
-Tùy vào tính cách và nguyện vọng (Thích ở phố lớn, hay thích ở gần nhà máy để đi làm thêm), chuyên gia sẽ chọn trường phù hợp nhất.
-
-📞 Nhắn cho SIGE xin [SỐ ĐIỆN THOẠI] của anh/chị, chuyên gia sẽ gọi điện định hướng trực tiếp để không chọn sai trường nhé!""",
+Tùy vào tính cách và nguyện vọng (Thích ở phố lớn, hay thích ở gần nhà máy để đi làm thêm), cán bộ tuyển sinh sẽ chọn trường phù hợp nhất.
+ 
+ 📞 Nhắn cho SIGE xin [SỐ ĐIỆN THOẠI] của anh/chị, cán bộ tuyển sinh sẽ gọi điện định hướng trực tiếp để không chọn sai trường nhé!""",
         "buttons": [
             {"text": "✍️ Tư vấn chọn trường", "callback": "start_lead_form"},
-            {"text": "📞 Gặp chuyên gia", "callback": "show_contact"}
+            {"text": "📞 Gặp cán bộ tuyển sinh", "callback": "show_contact"}
         ]
     },
 
@@ -121,8 +121,8 @@ Chương trình Vừa học Vừa làm cực kỳ phù hợp để tự chủ t�
 ✅ Trường Đại học Lĩnh Đông đang cấp 20 suất Học bổng 100% học phí độc quyền qua SIGE.
 
 🎁 SIGE đang tặng 05 suất [Miễn phí lớp học tiếng/ Tặng vali] cho hồ sơ đăng ký tuần này.
-
-📞 Chỉ còn đúng 3 suất nhận ưu đãi, anh/chị gõ [SỐ ĐIỆN THOẠI] để chuyên gia SIGE gọi điện tư vấn lộ trình và cách nhận lương thực tập sớm nhất nhé!""",
+ 
+ 📞 Chỉ còn đúng 3 suất nhận ưu đãi, anh/chị gõ [SỐ ĐIỆN THOẠI] để cán bộ tuyển sinh SIGE gọi điện tư vấn lộ trình và cách nhận lương thực tập sớm nhất nhé!""",
         "buttons": [
             {"text": "✅ Đăng ký nhận quà 🎁", "callback": "start_lead_form"},
             {"text": "🏫 Các hệ khác", "callback": "show_program_menu"}
@@ -130,14 +130,14 @@ Chương trình Vừa học Vừa làm cực kỳ phù hợp để tự chủ t�
     },
 
     "he_thac_si_detail": {
-        "text": """Chương trình Thạc sĩ: Dành cho Cử nhân Đại học. Học bổng 50-100% tuỳ hồ sơ, dễ dàng tìm việc làm quản lý và định cư lâu dài.\n\nBạn có muốn chuyên viên tư vấn trực tiếp lộ trình này ngay bây giờ không?""",
+        "text": """Chương trình Thạc sĩ: Dành cho Cử nhân Đại học. Học bổng 50-100% tuỳ hồ sơ, dễ dàng tìm việc làm quản lý và định cư lâu dài.\n\nBạn có muốn cán bộ tuyển sinh tư vấn trực tiếp lộ trình này ngay bây giờ không?""",
         "buttons": [
             {"text": "📞 Liên hệ ngay cho tôi", "callback": "start_lead_form"}
         ]
     },
 
     "he_ngon_ngu_detail": {
-        "text": """Hệ Ngôn ngữ: Dành cho người muốn học nhanh tiếng Trung tại bản xứ. Sau 6 tháng được làm thêm, chi phí đầu tư ban đầu thấp.\n\nBạn có muốn chuyên viên tư vấn trực tiếp lộ trình này ngay bây giờ không?""",
+        "text": """Hệ Ngôn ngữ: Dành cho người muốn học nhanh tiếng Trung tại bản xứ. Sau 6 tháng được làm thêm, chi phí đầu tư ban đầu thấp.\n\nBạn có muốn cán bộ tuyển sinh tư vấn trực tiếp lộ trình này ngay bây giờ không?""",
         "buttons": [
             {"text": "📞 Liên hệ ngay cho tôi", "callback": "start_lead_form"}
         ]
@@ -177,8 +177,8 @@ Viện SIGE cung cấp các gói dịch vụ minh bạch, cam kết không phát
 Dạ, vấn đề tài chính phụ thuộc vào hồ sơ của mình có đạt học bổng hay không.
 
 Chi phí đi qua SIGE là Trọn gói & Minh bạch 100%. Nếu học bạ đẹp, SIGE sẽ xin được suất miễn 100% học phí, lúc đó chi phí ban đầu cực kỳ thấp.
-
-Để có bảng dự toán chính xác đến từng đồng (Không phát sinh), anh/chị vui lòng để lại [SỐ ĐIỆN THOẠI]. Chuyên viên sẽ gọi hỏi điểm cấp 3 và báo giá luôn ạ!""",
+ 
+ Để có bảng dự toán chính xác đến từng đồng (Không phát sinh), anh/chị vui lòng để lại [SỐ ĐIỆN THOẠI]. Cán bộ tuyển sinh sẽ gọi hỏi điểm cấp 3 và báo giá luôn ạ!""",
         "buttons": [
             {"text": "💰 Nhận bảng dự toán", "callback": "start_lead_form"},
             {"text": "💼 Tìm học bổng giảm phí", "callback": "ask_hoc_bong_chung"}

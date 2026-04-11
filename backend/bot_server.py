@@ -24,8 +24,11 @@ import os
 env_path = os.path.join(os.path.dirname(__file__), "..", ".env")
 load_dotenv(dotenv_path=env_path)
 
-FB_PAGE_ACCESS_TOKEN = os.getenv("FB_PAGE_ACCESS_TOKEN")
-FB_VERIFY_TOKEN = os.getenv("FB_VERIFY_TOKEN", "SIGE_BOT_2026")
+# Import setting from config
+from backend.config import (
+    FB_PAGE_ACCESS_TOKEN, FB_VERIFY_TOKEN, BOT_APP_IDS, 
+    SHARED_INBOX_APP_ID, AD_AUTOMATION_PATTERNS
+)
 
 # Session States
 PHONE, GPA, LANGUAGE, CONTACT_TIME = range(4)
@@ -102,12 +105,25 @@ def webhook():
                     
                     # Detect Echo (Human Admin vs AI Bot)
                     if message_data.get("is_echo"):
-                        # If app_id is NOT our bot's app_id, it was sent by a human via Inbox or Business Suite
+                        # If app_id is NOT in BOT_APP_IDS, it was sent by a human via Inbox or Business Suite
                         echo_app_id = str(message_data.get("app_id", ""))
-                        if echo_app_id != "921841513979535":
+                        # 🕵️ Advanced Human vs Bot detection
+                        is_automation = False
+                        if echo_app_id in BOT_APP_IDS:
+                            is_automation = True
+                        elif echo_app_id == SHARED_INBOX_APP_ID:
+                            # Check if the text matches known ad automation patterns
+                            echo_text = message_data.get("text", "")
+                            for pattern in AD_AUTOMATION_PATTERNS:
+                                if re.search(pattern, echo_text):
+                                    is_automation = True
+                                    logger.info(f"🤖 Detected ad automation echo from {echo_app_id}. Skipping pause.")
+                                    break
+                        
+                        if not is_automation:
                             recipient_id = messaging_event["recipient"]["id"]
                             LAST_HUMAN_ACTIVITY[recipient_id] = time.time()
-                            logger.info(f"👨‍💻 Human consultant (App ID: {echo_app_id}) responded to {recipient_id}. Pausing bot for 5 mins.")
+                            logger.info(f"👨‍💻 Cán bộ tuyển sinh (App ID: {echo_app_id}) responded to {recipient_id}. Pausing bot for 5 mins.")
                         continue
                         
                     message_text = message_data.get("text")
@@ -163,7 +179,7 @@ def handle_message(sender_id, text, payload=None):
                 
                 # Case 11: Khóa khách siêu nóng (Anh Nam's doctrine)
                 if sender_id not in SESSIONS or SESSIONS[sender_id].get("step") != PHONE:
-                    msg = "🚨 SIGE đã tiếp nhận thông tin! Chuyên gia sẽ gọi lại cho bạn trong 15 phút tới.\n\nĐể cuộc gọi hiệu quả nhất, Điểm trung bình học tập gần nhất của bạn là bao nhiêu? (Ví dụ: 8.5 hoặc 75)"
+                    msg = "🚨 SIGE đã tiếp nhận thông tin! Cán bộ tuyển sinh sẽ gọi lại cho bạn trong 15 phút tới.\n\nĐể cuộc gọi hiệu quả nhất, Điểm trung bình học tập gần nhất của bạn là bao nhiêu? (Ví dụ: 8.5 hoặc 75)"
                     send_text_message(sender_id, msg)
                     
                     # Chokehold: Khóa khách vào Form GPA vì đã có sẵn SĐT
@@ -250,18 +266,28 @@ def handle_lead_form(sender_id, text, payload=None):
         data["ghi_chu_chi_tiet"] = text # Store original text in case they added time here
         
         session["step"] = GPA
-        msg = "Tuyệt vời! Để chuyên viên tư vấn lộ trình và chi phí chính xác nhất, Điểm trung bình học tập gần nhất của bạn là bao nhiêu? (Ví dụ: 8.5 hoặc 75)\n\n💡 Điểm trung bình từ 6.0 trở lên là điều kiện tối thiểu."
+        msg = "Tuyệt vời! Để cán bộ tuyển sinh tư vấn lộ trình và chi phí chính xác nhất, Điểm trung bình học tập gần nhất của bạn là bao nhiêu? (Ví dụ: 8.5 hoặc 75)\n\n💡 Điểm trung bình từ 6.0 trở lên là điều kiện tối thiểu."
         send_text_message(sender_id, msg)
+        return
 
+    elif step == GPA:
         try:
             raw_text = text.replace(",", ".")
-            raw_val = float(re.search(r'\d+(\.\d+)?', raw_text).group()) if re.search(r'\d+(\.\d+)?', raw_text) else 0.0
+            # Extract number using regex, handling potential text around it
+            num_match = re.search(r'\d+(\.\d+)?', raw_text)
+            if not num_match:
+                send_text_message(sender_id, "❌ Vui lòng nhập điểm số hợp lệ dưới dạng số (ví dụ: 7.5 hoặc 80):")
+                return
+
+            raw_val = float(num_match.group())
             
-            if raw_val > 100:
-                send_text_message(sender_id, "❌ Điểm không hợp lệ. Vui lòng nhập lại Điểm trung bình chính xác của bạn:")
+            if raw_val > 100 or raw_val < 0:
+                send_text_message(sender_id, "❌ Điểm không hợp lệ. Vui lòng nhập lại Điểm trung bình chính xác của bạn (0-10 hoặc 0-100):")
                 return
                 
+            # Normalize to 10.0 scale if it's 100-scale
             gpa_val = raw_val if raw_val <= 10 else raw_val / 10
+            
             if gpa_val < 6.0:
                 send_text_message(sender_id, "⚠️ Hiện tại SIGE yêu cầu Điểm Cấp 3 tối thiểu 6.0. Vui lòng nhập lại điểm chính xác của bạn:")
                 return
@@ -269,7 +295,8 @@ def handle_lead_form(sender_id, text, payload=None):
             data["gpa"] = str(round(gpa_val, 2))
             session["step"] = LANGUAGE
             send_language_selection(sender_id)
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error processing GPA: {e}")
             send_text_message(sender_id, "Vui lòng nhập điểm số hợp lệ (ví dụ: 7.5 hoặc 80):")
             return
 
@@ -281,7 +308,7 @@ def handle_lead_form(sender_id, text, payload=None):
             
         data["language"] = lang
         session["step"] = CONTACT_TIME
-        send_text_message(sender_id, "Cuối cùng, khung giờ nào là thuận tiện nhất để chuyên gia SIGE gọi điện chốt lịch phỏng vấn VIP 1-1 với bạn?")
+        send_text_message(sender_id, "Cuối cùng, khung giờ nào là thuận tiện nhất để cán bộ tuyển sinh SIGE gọi điện chốt lịch phỏng vấn VIP 1-1 với bạn?")
 
     elif step == CONTACT_TIME:
         # If they already had a phone from detection, combine it
@@ -347,7 +374,7 @@ def process_final_confirmation(sender_id):
     
     # 3. Send Formal Success Message 
     success_text = (
-        "Hệ thống đã ghi nhận đầy đủ hồ sơ của bạn. Chuyên viên tư vấn của Viện SIGE sẽ gọi điện trực tiếp cho bạn qua số điện thoại vừa đăng ký trong vòng 15 phút tới để chốt khung giờ làm việc VIP 1-1. Vui lòng chú ý điện thoại!\n"
+        "Hệ thống đã ghi nhận đầy đủ hồ sơ của bạn. Cán bộ tuyển sinh của Viện SIGE sẽ gọi điện trực tiếp cho bạn qua số điện thoại vừa đăng ký trong vòng 15 phút tới để chốt khung giờ làm việc VIP 1-1. Vui lòng chú ý điện thoại!\n"
     )
     send_text_message(sender_id, success_text)
     
@@ -355,7 +382,7 @@ def process_final_confirmation(sender_id):
     import time
     time.sleep(5)
     upsell_text = (
-        "Cảm ơn bạn đã tin tưởng Viện SIGE! 🤝 Trong thời gian chờ đợi chuyên gia liên hệ, mời bạn tham gia 'Cộng Đồng Du Học Sinh Đài Loan - SIGE' trên Zalo để cập nhật trước các suất học bổng độc quyền và tài liệu nội bộ nhé: https://zalo.me/g/1qhp6fguhkziurmfsywx"
+        "Cảm ơn bạn đã tin tưởng Viện SIGE! 🤝 Trong thời gian chờ đợi cán bộ tuyển sinh liên hệ, mời bạn tham gia 'Cộng Đồng Du Học Sinh Đài Loan - SIGE' trên Zalo để cập nhật trước các suất học bổng độc quyền và tài liệu nội bộ nhé: https://zalo.me/g/1qhp6fguhkziurmfsywx"
     )
     send_text_message(sender_id, upsell_text)
     
@@ -440,7 +467,7 @@ def handle_postback(sender_id, payload):
                     send_text_message(sender_id, "Thông tin này đang được cập nhật.")
         
         elif payload == "show_contact":
-            send_text_message(sender_id, "📍 Địa chỉ: Tòa VINATA 2B, 289 Khuất Duy Tiến, Hà Nội.\n\nĐể chuyên viên SIGE có thể tư vấn chi tiết cho bạn, vui lòng để lại số điện thoại nhé!")
+            send_text_message(sender_id, "📍 Địa chỉ: Tòa VINATA 2B, 289 Khuất Duy Tiến, Hà Nội.\n\nĐể cán bộ tuyển sinh SIGE có thể tư vấn chi tiết cho bạn, vui lòng để lại số điện thoại nhé!")
 
         send_typing_indicator(sender_id, "typing_off")
         
