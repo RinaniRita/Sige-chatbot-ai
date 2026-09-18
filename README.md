@@ -144,7 +144,3 @@ Located in `backend/tools/`:
 - `backend/database/`: SQLite schema and data persistence logic.
 - `backend/services/`: Core logic for LLM, RAG retrieval, and scripted answers.
 
----
-
-**SIGE - Science Institute for Global Education**  
-*Building Dreams, Connecting Global Talent.*
